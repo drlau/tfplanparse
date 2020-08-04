@@ -1,3 +1,3 @@
-module github.com/drlau/vision
+module github.com/drlau/tf-plan-parse
 
 go 1.14

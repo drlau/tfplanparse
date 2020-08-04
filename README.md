@@ -1,6 +1,6 @@
-# vision
+# tf-plan-parse
 
-Vision is a Go library that can be used to parse `terraform plan` outputs.
+tf-plan-parse is a Go library that can be used to parse `terraform plan` outputs.
 
 Still a WIP project.
 

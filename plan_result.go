@@ -1,7 +1,7 @@
-package vision
+package tfplanparse
 
 import (
-	"github.com/drlau/vision/plan"
+	"github.com/drlau/tf-plan-parse/plan"
 )
 
 type PlanResult struct {

@@ -1,4 +1,4 @@
-package vision
+package tfplanparse
 
 import (
 	"bufio"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/drlau/vision/plan"
+	"github.com/drlau/tf-plan-parse/plan"
 )
 
 const (
