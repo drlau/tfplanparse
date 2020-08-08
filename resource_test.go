@@ -1,4 +1,4 @@
-package plan
+package tfplanparse
 
 import (
 	"reflect"

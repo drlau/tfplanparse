@@ -2,11 +2,10 @@ package tfplanparse
 
 import (
 	"bufio"
+	"io"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/drlau/tfplanparse/plan"
 )
 
 const (
@@ -16,13 +15,7 @@ const (
 	ERROR_STRING         = "Error: "
 )
 
-type PlanResult struct {
-	Resources []*plan.ResourcePlan
-}
-
-// TODO: remove ANSI color codes
-
-func Parse(body string) *PlanResult {
+func Parse(input io.Reader) []*ResourcePlan {
 	// Overall:
 	// Look for the start of resources
 	// No changes -> return
@@ -30,19 +23,19 @@ func Parse(body string) *PlanResult {
 	// New / Force Replace -> Parse every line
 	// Update in place -> parse only changed lines
 	// Destroy -> name only
-	return &PlanResult{}
+	return []*ResourcePlan{}
 }
 
 // TODO: handle multi level structs
-func ParseFromFile(filepath string) *PlanResult {
+func ParseFromFile(filepath string) []*ResourcePlan {
 	f, err := os.Open(filepath)
 	if err != nil {
 		panic(err)
 	}
 
-	result := &PlanResult{}
-	var resourcePlan *plan.ResourcePlan
-	var mapAttributeChange *plan.MapAttributeChange
+	result := []*ResourcePlan{}
+	var resourcePlan *ResourcePlan
+	var mapAttributeChange *MapAttributeChange
 
 	parse := false
 	scanner := bufio.NewScanner(f)
@@ -56,28 +49,28 @@ func ParseFromFile(filepath string) *PlanResult {
 				// we are done
 
 				if resourcePlan != nil {
-					result.Resources = append(result.Resources, resourcePlan)
+					result = append(result, resourcePlan)
 				}
 				return result
 			}
 
-			if plan.IsResourceCommentLine(text) {
+			if IsResourceCommentLine(text) {
 				if resourcePlan != nil {
-					result.Resources = append(result.Resources, resourcePlan)
+					result = append(result, resourcePlan)
 				}
 
-				resourcePlan, err = plan.NewResourcePlanFromComment(text)
+				resourcePlan, err = NewResourcePlanFromComment(text)
 				if err != nil {
 					panic(err)
 				}
-			} else if plan.IsMapAttributeChangeLine(text) {
-				mapAttributeChange, err = plan.NewMapAttributeChangeFromLine(text)
+			} else if IsMapAttributeChangeLine(text) {
+				mapAttributeChange, err = NewMapAttributeChangeFromLine(text)
 				if err != nil {
 					panic(err)
 				}
-			} else if plan.IsAttributeChangeLine(text) {
+			} else if IsAttributeChangeLine(text) {
 				log.Printf("running for line %v\n", text)
-				ac, err := plan.NewAttributeChangeFromLine(text)
+				ac, err := NewAttributeChangeFromLine(text)
 				if err != nil {
 					panic(err)
 				}
@@ -86,7 +79,7 @@ func ParseFromFile(filepath string) *PlanResult {
 				} else {
 					resourcePlan.AttributeChanges = append(resourcePlan.AttributeChanges, ac)
 				}
-			} else if mapAttributeChange != nil && plan.IsMapAttributeTerminator(text) {
+			} else if mapAttributeChange != nil && IsMapAttributeTerminator(text) {
 				if resourcePlan != nil {
 					resourcePlan.MapAttributeChanges = append(resourcePlan.MapAttributeChanges, mapAttributeChange)
 					mapAttributeChange = nil
@@ -106,7 +99,7 @@ func ParseFromFile(filepath string) *PlanResult {
 	}
 
 	if resourcePlan != nil {
-		result.Resources = append(result.Resources, resourcePlan)
+		result = append(result, resourcePlan)
 	}
 
 	return result

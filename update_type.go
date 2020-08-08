@@ -1,4 +1,4 @@
-package plan
+package tfplanparse
 
 type UpdateType string
 
