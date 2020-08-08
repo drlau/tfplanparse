@@ -1,6 +1,6 @@
-# tf-plan-parse
+# tfplanparse
 
-tf-plan-parse is a Go library that can be used to parse `terraform plan` outputs.
+tfplanparse is a Go library that can be used to parse `terraform plan` outputs.
 
 Still a WIP project.
 

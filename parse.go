@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/drlau/tf-plan-parse/plan"
+	"github.com/drlau/tfplanparse/plan"
 )
 
 const (
@@ -15,6 +15,10 @@ const (
 	CHANGES_END_STRING   = "Plan: "
 	ERROR_STRING         = "Error: "
 )
+
+type PlanResult struct {
+	Resources []*plan.ResourcePlan
+}
 
 // TODO: remove ANSI color codes
 
@@ -43,7 +47,7 @@ func ParseFromFile(filepath string) *PlanResult {
 	parse := false
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		text := strings.TrimSpace(scanner.Text())
+		text := strings.TrimSpace(uncolor(scanner.Bytes()))
 
 		if parse {
 			if text == "" {
