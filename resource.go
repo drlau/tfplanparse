@@ -111,34 +111,38 @@ func NewResourceChangeFromComment(comment string) (*ResourceChange, error) {
 }
 
 func (rc *ResourceChange) finalizeResourceInfo() error {
-	values := strings.Split(rc.Address, ".")
-	name := ""
+	var address string
 
+	// parse index first in case the index contains a "."
+	addressIndex := strings.Split(rc.Address, "[")
+	address = addressIndex[0]
+
+	if len(addressIndex) == 2 {
+		index := dequote(strings.TrimSuffix(addressIndex[1], "]"))
+
+		if i, err := strconv.Atoi(index); err == nil {
+			rc.Index = i
+		} else {
+			rc.Index = index
+		}
+	} else if len(addressIndex) > 2 {
+		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
+	}
+
+	values := strings.Split(address, ".")
+
+	// TODO: handle module.module_name.data.data_name.type.name better
 	if len(values) == 2 {
-		name = values[1]
+		rc.Name = values[1]
 		rc.Type = values[0]
-	} else if len(values) == 4 {
-		name = values[3]
-		rc.Type = values[2]
+	} else if len(values) > 2 {
+		rc.Name = values[len(values) - 1]
+		rc.Type = values[len(values) - 2]
 		rc.ModuleAddress = fmt.Sprintf("%s.%s", values[0], values[1])
 	} else {
 		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
 	}
 
-	nameIndex := strings.Split(name, "[")
-	if len(nameIndex) == 1 {
-		rc.Name = name
-		return nil
-	}
-	rc.Name = nameIndex[0]
-
-	index := dequote(strings.TrimSuffix(nameIndex[1], "]"))
-	if i, err := strconv.Atoi(index); err == nil {
-		rc.Index = i
-		return nil
-	}
-
-	rc.Index = index
 	return nil
 }
 
