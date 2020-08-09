@@ -107,3 +107,308 @@ func TestNewMapAttributeChangeFromLine(t *testing.T) {
 		})
 	}
 }
+
+func TestGetBeforeAttribute(t *testing.T) {
+	cases := map[string]struct {
+		ma       *MapAttributeChange
+		expected map[string]interface{}
+		opts     []GetBeforeAfterOptions
+	}{
+		"one attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "newValue",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute": "oldValue",
+			},
+		},
+		"multiple attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute1",
+						OldValue: "oldValue1",
+						NewValue: "newValue1",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute1": "oldValue1",
+				"attribute2": "oldValue2",
+			},
+		},
+		"map attribute": {
+			ma: &MapAttributeChange{
+				MapAttributeChanges: []*MapAttributeChange{
+					&MapAttributeChange{
+						Name: "map",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								Name:     "attribute1",
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+							&AttributeChange{
+								Name:     "attribute2",
+								OldValue: "oldValue2",
+								NewValue: "newValue2",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"map": map[string]interface{}{
+					"attribute1": "oldValue1",
+					"attribute2": "oldValue2",
+				},
+			},
+		},
+		"map and normal attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "newValue",
+					},
+				},
+				MapAttributeChanges: []*MapAttributeChange{
+					&MapAttributeChange{
+						Name: "map",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								Name:     "attribute1",
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+							&AttributeChange{
+								Name:     "attribute2",
+								OldValue: "oldValue2",
+								NewValue: "newValue2",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute": "oldValue",
+				"map": map[string]interface{}{
+					"attribute1": "oldValue1",
+					"attribute2": "oldValue2",
+				},
+			},
+		},
+		"ignore sensitive values": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "(sensitive value)",
+						NewValue: "(sensitive value)",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute2": "oldValue2",
+			},
+			opts: []GetBeforeAfterOptions{IgnoreSensitive},
+		},
+		// no tests for computed options because "before" values are never "computed"
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if got := tc.ma.GetBeforeAttribute(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
+				t.Fatalf("Expected: %v but got %v", tc.expected, got)
+			}
+		})
+	}
+}
+
+func TestGetAfterAttribute(t *testing.T) {
+	cases := map[string]struct {
+		ma       *MapAttributeChange
+		expected map[string]interface{}
+		opts     []GetBeforeAfterOptions
+	}{
+		"one attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "newValue",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute": "newValue",
+			},
+		},
+		"multiple attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute1",
+						OldValue: "oldValue1",
+						NewValue: "newValue1",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute1": "newValue1",
+				"attribute2": "newValue2",
+			},
+		},
+		"map attribute": {
+			ma: &MapAttributeChange{
+				MapAttributeChanges: []*MapAttributeChange{
+					&MapAttributeChange{
+						Name: "map",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								Name:     "attribute1",
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+							&AttributeChange{
+								Name:     "attribute2",
+								OldValue: "oldValue2",
+								NewValue: "newValue2",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"map": map[string]interface{}{
+					"attribute1": "newValue1",
+					"attribute2": "newValue2",
+				},
+			},
+		},
+		"map and normal attribute": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "newValue",
+					},
+				},
+				MapAttributeChanges: []*MapAttributeChange{
+					&MapAttributeChange{
+						Name: "map",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								Name:     "attribute1",
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+							&AttributeChange{
+								Name:     "attribute2",
+								OldValue: "oldValue2",
+								NewValue: "newValue2",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute": "newValue",
+				"map": map[string]interface{}{
+					"attribute1": "newValue1",
+					"attribute2": "newValue2",
+				},
+			},
+		},
+		"ignore sensitive values": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "(sensitive value)",
+						NewValue: "(sensitive value)",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute2": "newValue2",
+			},
+			opts: []GetBeforeAfterOptions{IgnoreSensitive},
+		},
+		"ignore computed values": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "(known after apply)",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute2": "newValue2",
+			},
+			opts: []GetBeforeAfterOptions{IgnoreComputed},
+		},
+		"computed only": {
+			ma: &MapAttributeChange{
+				AttributeChanges: []*AttributeChange{
+					&AttributeChange{
+						Name:     "attribute",
+						OldValue: "oldValue",
+						NewValue: "(known after apply)",
+					},
+					&AttributeChange{
+						Name:     "attribute2",
+						OldValue: "oldValue2",
+						NewValue: "newValue2",
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"attribute": "(known after apply)",
+			},
+			opts: []GetBeforeAfterOptions{ComputedOnly},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if got := tc.ma.GetAfterAttribute(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
+				t.Fatalf("Expected: %v but got %v", tc.expected, got)
+			}
+		})
+	}
+}

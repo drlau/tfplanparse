@@ -9,3 +9,7 @@ func IgnoreComputed(a *AttributeChange) bool {
 func IgnoreSensitive(a *AttributeChange) bool {
 	return a.IsSensitive()
 }
+
+func ComputedOnly(a *AttributeChange) bool {
+	return !a.IsComputed()
+}

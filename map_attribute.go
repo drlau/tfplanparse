@@ -58,15 +58,21 @@ func NewMapAttributeChangeFromLine(line string) (*MapAttributeChange, error) {
 	}
 }
 
-func (m *MapAttributeChange) GetBeforeAttribute() map[string]interface{} {
+func (m *MapAttributeChange) GetBeforeAttribute(opts ...GetBeforeAfterOptions) map[string]interface{} {
 	result := map[string]interface{}{}
 
+attrs:
 	for _, a := range m.AttributeChanges {
+		for _, opt := range opts {
+			if opt(a) {
+				continue attrs
+			}
+		}
 		result[a.Name] = a.OldValue
 	}
 
 	for _, ma := range m.MapAttributeChanges {
-		result[ma.Name] = ma.GetBeforeAttribute()
+		result[ma.Name] = ma.GetBeforeAttribute(opts...)
 	}
 
 	return result
