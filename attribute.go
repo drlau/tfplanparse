@@ -100,6 +100,16 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 	}
 }
 
+// IsSensitive returns true if the attribute contains a sensitive value
+func (a *AttributeChange) IsSensitive() bool {
+	return a.OldValue == "(sensitive value)" || a.NewValue == "(sensitive value)"
+}
+
+// IsComputed returns true if the attribute contains a computed value
+func (a *AttributeChange) IsComputed() bool {
+	return a.OldValue == "(known after apply)" || a.NewValue == "(known after apply)"
+}
+
 func removeChangeTypeCharacters(line string) string {
 	return strings.TrimLeft(line, "+/-~<= ")
 }

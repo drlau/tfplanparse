@@ -5,10 +5,12 @@ import (
 	"strings"
 )
 
-type ResourcePlan struct {
-	Path                string
-	Type                string
-	Name                string
+type ResourceChange struct {
+	Address string
+	// ModuleAddress string
+	Type string
+	Name string
+	// Index interface{}
 	UpdateType          UpdateType
 	Tainted             bool
 	AttributeChanges    []*AttributeChange
@@ -41,64 +43,64 @@ func IsResourceChangeLine(line string) bool {
 	return (strings.HasPrefix(line, "resource") || strings.HasPrefix(line, "data")) && strings.HasSuffix(line, " {")
 }
 
-// NewResourcePlanFromComment creates a ResourcePlan from a valid resource comment line
-func NewResourcePlanFromComment(comment string) (*ResourcePlan, error) {
+// NewResourceChangeFromComment creates a ResourceChange from a valid resource comment line
+func NewResourceChangeFromComment(comment string) (*ResourceChange, error) {
 	comment = strings.TrimSpace(comment)
 	if !IsResourceCommentLine(comment) {
 		return nil, fmt.Errorf("%s is not a valid line to initialize a resource", comment)
 	}
 
 	if strings.HasSuffix(comment, RESOURCE_CREATED) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "# "), RESOURCE_CREATED))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "# "), RESOURCE_CREATED))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: NewResource,
 		}, nil
 	} else if strings.HasSuffix(comment, RESOURCE_READ) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_READ))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_READ))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: ReadResource,
 		}, nil
 	} else if strings.HasSuffix(comment, RESOURCE_UPDATED_IN_PLACE) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_UPDATED_IN_PLACE))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_UPDATED_IN_PLACE))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: UpdateInPlaceResource,
 		}, nil
 	} else if strings.HasSuffix(comment, RESOURCE_TAINTED) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_TAINTED))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_TAINTED))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: ForceReplaceResource,
 			Tainted:    true,
 		}, nil
 	} else if strings.HasSuffix(comment, RESOURCE_REPLACED) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_REPLACED))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_REPLACED))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: ForceReplaceResource,
 		}, nil
 	} else if strings.HasSuffix(comment, RESOURCE_DESTROYED) {
-		resourcePath := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_DESTROYED))
-		resourceType, resourceName := parseResourceTypeAndName(resourcePath)
-		return &ResourcePlan{
-			Path:       resourcePath,
+		resourceAddress := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(comment, "#"), RESOURCE_DESTROYED))
+		resourceType, resourceName := parseResourceTypeAndName(resourceAddress)
+		return &ResourceChange{
+			Address:    resourceAddress,
 			Type:       resourceType,
 			Name:       resourceName,
 			UpdateType: DestroyResource,
@@ -106,6 +108,40 @@ func NewResourcePlanFromComment(comment string) (*ResourcePlan, error) {
 	}
 
 	return nil, fmt.Errorf("unknown comment line %s", comment)
+}
+
+func (rc *ResourceChange) GetBeforeResource() map[string]interface{} {
+	result := map[string]interface{}{}
+
+	for _, a := range rc.AttributeChanges {
+		result[a.Name] = a.OldValue
+	}
+
+	for _, m := range rc.MapAttributeChanges {
+		result[m.Name] = m.GetBeforeAttribute()
+	}
+
+	return result
+}
+
+func (rc *ResourceChange) GetAfterResource(opts ...GetBeforeAfterOptions) map[string]interface{} {
+	result := map[string]interface{}{}
+
+attrs:
+	for _, a := range rc.AttributeChanges {
+		for _, opt := range opts {
+			if opt(a) {
+				continue attrs
+			}
+		}
+		result[a.Name] = a.NewValue
+	}
+
+	for _, m := range rc.MapAttributeChanges {
+		result[m.Name] = m.GetAfterAttribute(opts...)
+	}
+
+	return result
 }
 
 func parseResourceTypeAndName(line string) (string, string) {

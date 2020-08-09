@@ -60,11 +60,11 @@ func TestIsResourceCommentLine(t *testing.T) {
 	}
 }
 
-func TestNewResourcePlanFromComment(t *testing.T) {
+func TestNewResourceChangeFromComment(t *testing.T) {
 	cases := map[string]struct {
 		line        string
 		shouldError bool
-		expected    *ResourcePlan
+		expected    *ResourceChange
 	}{
 		"empty line": {
 			line:        "",
@@ -74,8 +74,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource created": {
 			line:        "# resource.path will be created",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: NewResource,
@@ -84,8 +84,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource read during apply": {
 			line:        "# resource.path will be read during apply",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: ReadResource,
@@ -99,8 +99,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource updated in place": {
 			line:        "# resource.path will be updated in-place",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: UpdateInPlaceResource,
@@ -109,8 +109,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource tainted": {
 			line:        "# resource.path is tainted, so must be replaced",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: ForceReplaceResource,
@@ -120,8 +120,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource replaced": {
 			line:        "# resource.path must be replaced",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: ForceReplaceResource,
@@ -130,8 +130,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"resource destroyed": {
 			line:        "# resource.path will be destroyed",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: DestroyResource,
@@ -140,8 +140,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"handles extra spaces": {
 			line:        "    # resource.path will be created",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "resource.path",
+			expected: &ResourceChange{
+				Address:    "resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: NewResource,
@@ -150,8 +150,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"handles data paths spaces": {
 			line:        "    # data.mydata.resource.path will be read during apply",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "data.mydata.resource.path",
+			expected: &ResourceChange{
+				Address:    "data.mydata.resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: ReadResource,
@@ -160,8 +160,8 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 		"handles modules with extra spaces": {
 			line:        "    # module.mymodule.resource.path will be created",
 			shouldError: false,
-			expected: &ResourcePlan{
-				Path:       "module.mymodule.resource.path",
+			expected: &ResourceChange{
+				Address:    "module.mymodule.resource.path",
 				Type:       "resource",
 				Name:       "path",
 				UpdateType: NewResource,
@@ -175,7 +175,7 @@ func TestNewResourcePlanFromComment(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			got, err := NewResourcePlanFromComment(tc.line)
+			got, err := NewResourceChangeFromComment(tc.line)
 			if err == nil && tc.shouldError {
 				t.Fatalf("Expected an error but didn't get one")
 			}

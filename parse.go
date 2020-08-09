@@ -23,9 +23,9 @@ const (
 // Update in place -> parse only changed lines
 // Destroy -> name only
 // TODO: handle multi level structs
-func Parse(input io.Reader) ([]*ResourcePlan, error) {
-	result := []*ResourcePlan{}
-	var resourcePlan *ResourcePlan
+func Parse(input io.Reader) ([]*ResourceChange, error) {
+	result := []*ResourceChange{}
+	var resourceChange *ResourceChange
 	var mapAttributeChange *MapAttributeChange
 	var err error
 
@@ -40,18 +40,18 @@ func Parse(input io.Reader) ([]*ResourcePlan, error) {
 			} else if strings.Contains(text, CHANGES_END_STRING) {
 				// we are done
 
-				if resourcePlan != nil {
-					result = append(result, resourcePlan)
+				if resourceChange != nil {
+					result = append(result, resourceChange)
 				}
 				return result, nil
 			}
 
 			if IsResourceCommentLine(text) {
-				if resourcePlan != nil {
-					result = append(result, resourcePlan)
+				if resourceChange != nil {
+					result = append(result, resourceChange)
 				}
 
-				resourcePlan, err = NewResourcePlanFromComment(text)
+				resourceChange, err = NewResourceChangeFromComment(text)
 				if err != nil {
 					return result, err
 				}
@@ -69,11 +69,11 @@ func Parse(input io.Reader) ([]*ResourcePlan, error) {
 				if mapAttributeChange != nil {
 					mapAttributeChange.AttributeChanges = append(mapAttributeChange.AttributeChanges, ac)
 				} else {
-					resourcePlan.AttributeChanges = append(resourcePlan.AttributeChanges, ac)
+					resourceChange.AttributeChanges = append(resourceChange.AttributeChanges, ac)
 				}
 			} else if mapAttributeChange != nil && IsMapAttributeTerminator(text) {
-				if resourcePlan != nil {
-					resourcePlan.MapAttributeChanges = append(resourcePlan.MapAttributeChanges, mapAttributeChange)
+				if resourceChange != nil {
+					resourceChange.MapAttributeChanges = append(resourceChange.MapAttributeChanges, mapAttributeChange)
 					mapAttributeChange = nil
 				}
 			} else {
@@ -90,17 +90,17 @@ func Parse(input io.Reader) ([]*ResourcePlan, error) {
 		}
 	}
 
-	if resourcePlan != nil {
-		result = append(result, resourcePlan)
+	if resourceChange != nil {
+		result = append(result, resourceChange)
 	}
 
 	return result, nil
 }
 
-func ParseFromFile(filepath string) ([]*ResourcePlan, error) {
+func ParseFromFile(filepath string) ([]*ResourceChange, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
-		return []*ResourcePlan{}, err
+		return []*ResourceChange{}, err
 	}
 
 	return Parse(f)
