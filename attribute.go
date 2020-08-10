@@ -8,6 +8,8 @@ import (
 const (
 	ATTRIBUTE_CHANGE_DELIMITER    = " -> "
 	ATTRIBUTE_DEFINITON_DELIMITER = " = "
+	SENSITIVE_VALUE               = "(sensitive value)"
+	COMPUTED_VALUE                = "(known after apply)"
 )
 
 type AttributeChange struct {
@@ -86,7 +88,10 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
 		if len(values) != 2 {
-			return nil, fmt.Errorf("failed to read attribute change from line %s", line)
+			if values[0] != SENSITIVE_VALUE {
+				return nil, fmt.Errorf("failed to read attribute change from line %s", line)
+			}
+			values = append(values, SENSITIVE_VALUE)
 		}
 
 		return &AttributeChange{
@@ -102,12 +107,12 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 
 // IsSensitive returns true if the attribute contains a sensitive value
 func (a *AttributeChange) IsSensitive() bool {
-	return a.OldValue == "(sensitive value)" || a.NewValue == "(sensitive value)"
+	return a.OldValue == SENSITIVE_VALUE || a.NewValue == SENSITIVE_VALUE
 }
 
 // IsComputed returns true if the attribute contains a computed value
 func (a *AttributeChange) IsComputed() bool {
-	return a.OldValue == "(known after apply)" || a.NewValue == "(known after apply)"
+	return a.OldValue == COMPUTED_VALUE || a.NewValue == COMPUTED_VALUE
 }
 
 func removeChangeTypeCharacters(line string) string {

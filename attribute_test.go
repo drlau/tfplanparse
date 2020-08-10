@@ -121,6 +121,16 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 				UpdateType: UpdateInPlaceResource,
 			},
 		},
+		"attribute changed and value is sensitive": {
+			line:        `~ attribute = (sensitive value)`,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   "(sensitive value)",
+				NewValue:   "(sensitive value)",
+				UpdateType: UpdateInPlaceResource,
+			},
+		},
 		"attribute is unchanged": {
 			line:        `attribute = "old"`,
 			shouldError: true,
