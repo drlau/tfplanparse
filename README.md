@@ -53,8 +53,8 @@ The returned type from `Parse` and `ParseFromFile` is `[]*tfplanparse.ResourceCh
 
 Each `ResourceChange` also has the following helper functions:
 
-- **`GetBeforeResource`**: Returns a copy of the resource before the planned changes as a `map[string]interface{}`
-- **`GetAfterResource`**: Returns a copy of the resource after the planned changes as a `map[string]interface{}`
+- **`GetBeforeResource`**: Returns the resource before the planned changes as a `map[string]interface{}`
+- **`GetAfterResource`**: Returns the resource after the planned changes as a `map[string]interface{}`
 
 Additionally, these helper functions accept the following options:
 
