@@ -33,9 +33,9 @@ func main() {
 
     // or, you can read directly from a file
     fromFile, err := tfplanparse.ParseFromFile("out.stdout")
-	if err != nil {
-		panic(err)
-	}
+    if err != nil {
+        panic(err)
+    }
 }
 ```
 
