@@ -2,6 +2,7 @@ package tfplanparse
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -14,8 +15,8 @@ const (
 
 type AttributeChange struct {
 	Name       string
-	OldValue   string
-	NewValue   string
+	OldValue   interface{}
+	NewValue   interface{}
 	UpdateType UpdateType
 }
 
@@ -43,18 +44,21 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 
 		return &AttributeChange{
 			Name:       strings.TrimSpace(attribute[0]),
-			OldValue:   "",
-			NewValue:   strings.TrimSpace(dequote(attribute[1])),
+			OldValue:   nil,
+			NewValue:   doTypeConversion(attribute[1]),
 			UpdateType: NewResource,
 		}, nil
 	} else if strings.HasPrefix(line, "-") {
 		// destroy
 		attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
 		if len(attribute) == 1 {
+			// line does not have an "="
+			// assume delimited with a space
+			attribute = strings.Split(attribute[0], " ")
 			return &AttributeChange{
-				Name:       strings.TrimSpace(attribute[0]),
-				OldValue:   "",
-				NewValue:   "",
+				Name:       attribute[0],
+				OldValue:   doTypeConversion(attribute[len(attribute)-1]),
+				NewValue:   nil,
 				UpdateType: DestroyResource,
 			}, nil
 		}
@@ -63,16 +67,16 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		if len(values) != 2 {
 			return &AttributeChange{
 				Name:       strings.TrimSpace(attribute[0]),
-				OldValue:   strings.TrimSpace(attribute[1]),
-				NewValue:   "",
+				OldValue:   doTypeConversion(strings.TrimSpace(attribute[1])),
+				NewValue:   nil,
 				UpdateType: DestroyResource,
 			}, nil
 		}
 
 		return &AttributeChange{
 			Name:       strings.TrimSpace(attribute[0]),
-			OldValue:   strings.TrimSpace(dequote(values[0])),
-			NewValue:   "",
+			OldValue:   doTypeConversion(values[0]),
+			NewValue:   nil,
 			UpdateType: DestroyResource,
 		}, nil
 	} else if strings.HasPrefix(line, "~") {
@@ -96,8 +100,8 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 
 		return &AttributeChange{
 			Name:       strings.TrimSpace(attribute[0]),
-			OldValue:   strings.TrimSpace(dequote(values[0])),
-			NewValue:   strings.TrimSpace(dequote(values[1])),
+			OldValue:   doTypeConversion(values[0]),
+			NewValue:   doTypeConversion(values[1]),
 			UpdateType: updateType,
 		}, nil
 	} else {
@@ -113,6 +117,35 @@ func (a *AttributeChange) IsSensitive() bool {
 // IsComputed returns true if the attribute contains a computed value
 func (a *AttributeChange) IsComputed() bool {
 	return a.OldValue == COMPUTED_VALUE || a.NewValue == COMPUTED_VALUE
+}
+
+func doTypeConversion(input string) interface{} {
+	// if it has quotes, assume it is a string and return it without quotes
+	if strings.HasPrefix(input, `"`) && strings.HasSuffix(input, `"`) {
+		return dequote(input)
+	}
+
+	if input == "{}" {
+		return nil
+	}
+
+	if input == "true" || input == "false" {
+		b, err := strconv.ParseBool(input)
+		if err != nil {
+			return input
+		}
+		return b
+	}
+
+	if i, err := strconv.Atoi(input); err == nil {
+		return i
+	}
+
+	if f, err := strconv.ParseFloat(input, 64); err == nil {
+		return f
+	}
+
+	return input
 }
 
 func removeChangeTypeCharacters(line string) string {

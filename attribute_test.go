@@ -76,8 +76,38 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 			shouldError: false,
 			expected: &AttributeChange{
 				Name:       "attribute",
-				OldValue:   "",
+				OldValue:   nil,
 				NewValue:   "new",
+				UpdateType: NewResource,
+			},
+		},
+		"bools are parsed as bools": {
+			line:        `+ attribute = true`,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   nil,
+				NewValue:   true,
+				UpdateType: NewResource,
+			},
+		},
+		"ints are parsed as ints": {
+			line:        `+ attribute = 1`,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   nil,
+				NewValue:   1,
+				UpdateType: NewResource,
+			},
+		},
+		"decimals are parsed as floats": {
+			line:        `+ attribute = 1.23`,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   nil,
+				NewValue:   1.23,
 				UpdateType: NewResource,
 			},
 		},
@@ -87,7 +117,17 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 			expected: &AttributeChange{
 				Name:       "attribute",
 				OldValue:   "deleted",
-				NewValue:   "",
+				NewValue:   nil,
+				UpdateType: DestroyResource,
+			},
+		},
+		"empty map is deleted": {
+			line:        `- attribute {}`,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   nil,
+				NewValue:   nil,
 				UpdateType: DestroyResource,
 			},
 		},
@@ -146,7 +186,7 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 			shouldError: false,
 			expected: &AttributeChange{
 				Name:       "attribute",
-				OldValue:   "",
+				OldValue:   nil,
 				NewValue:   "new",
 				UpdateType: NewResource,
 			},

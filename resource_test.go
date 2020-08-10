@@ -194,14 +194,14 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 			},
 		},
 		"int index": {
-			line:        "    # module.mymodule.resource.path[0] will be created",
+			line:        "    # module.mymodule.resource.path[1] will be created",
 			shouldError: false,
 			expected: &ResourceChange{
-				Address:       "module.mymodule.resource.path[0]",
+				Address:       "module.mymodule.resource.path[1]",
 				ModuleAddress: "module.mymodule",
 				Type:          "resource",
 				Name:          "path",
-				Index:         0,
+				Index:         1,
 				UpdateType:    NewResource,
 			},
 		},
