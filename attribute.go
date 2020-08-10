@@ -86,7 +86,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
 		if len(values) != 2 {
-			return nil, fmt.Errorf("failed to read attribute change")
+			return nil, fmt.Errorf("failed to read attribute change from line %s", line)
 		}
 
 		return &AttributeChange{
@@ -96,7 +96,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 			UpdateType: updateType,
 		}, nil
 	} else {
-		return nil, fmt.Errorf("unrecognized line pattern")
+		return nil, fmt.Errorf("unrecognized line pattern %s", line)
 	}
 }
 
