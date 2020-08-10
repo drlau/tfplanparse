@@ -7,15 +7,35 @@ import (
 )
 
 type ResourceChange struct {
-	Address       string
-	ModuleAddress string
-	Type          string
-	Name          string
-	Index         interface{}
+	// Address contains the absolute resource address
+	Address string
 
-	UpdateType          UpdateType
-	Tainted             bool
-	AttributeChanges    []*AttributeChange
+	// ModuleAddress contains the module portion of the absolute address, if any
+	ModuleAddress string
+
+	// The type of the resource
+	// Example: gcp_instance.foo -> "gcp_instance"
+	Type string
+
+	// The name of the resource
+	// Example: gcp_instance.foo -> "foo"
+	Name string
+
+	// The index key for resources created with "count" or "for_each"
+	// "count" resources will be an int index, and "for_each" will be a string
+	Index interface{}
+
+	// UpdateType contains the type of update
+	// Refer to updatetype.go for possible values
+	UpdateType UpdateType
+
+	// Tainted indicates whether the resource is tainted or not
+	Tainted bool
+
+	// AttributeChanges contains all the planned attribute changes
+	AttributeChanges []*AttributeChange
+
+	// MapAttributeChanges contains all the planned attribute changes that are map type attributes
 	MapAttributeChanges []*MapAttributeChange
 }
 
@@ -136,8 +156,8 @@ func (rc *ResourceChange) finalizeResourceInfo() error {
 		rc.Name = values[1]
 		rc.Type = values[0]
 	} else if len(values) > 2 {
-		rc.Name = values[len(values) - 1]
-		rc.Type = values[len(values) - 2]
+		rc.Name = values[len(values)-1]
+		rc.Type = values[len(values)-2]
 		rc.ModuleAddress = fmt.Sprintf("%s.%s", values[0], values[1])
 	} else {
 		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
