@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+const (
+	RESOURCE_CREATED                   = " will be created"
+	RESOURCE_READ                      = " will be read during apply"
+	RESOURCE_READ_VALUES_NOT_YET_KNOWN = " (config refers to values not yet known)"
+	RESOURCE_UPDATED_IN_PLACE          = " will be updated in-place"
+	RESOURCE_TAINTED                   = " is tainted, so must be replaced"
+	RESOURCE_REPLACED                  = " must be replaced"
+	RESOURCE_DESTROYED                 = " will be destroyed"
+)
+
 type ResourceChange struct {
 	// Address contains the absolute resource address
 	Address string
@@ -38,16 +48,6 @@ type ResourceChange struct {
 	// MapAttributeChanges contains all the planned attribute changes that are map type attributes
 	MapAttributeChanges []*MapAttributeChange
 }
-
-const (
-	RESOURCE_CREATED                   = " will be created"
-	RESOURCE_READ                      = " will be read during apply"
-	RESOURCE_READ_VALUES_NOT_YET_KNOWN = " (config refers to values not yet known)"
-	RESOURCE_UPDATED_IN_PLACE          = " will be updated in-place"
-	RESOURCE_TAINTED                   = " is tainted, so must be replaced"
-	RESOURCE_REPLACED                  = " must be replaced"
-	RESOURCE_DESTROYED                 = " will be destroyed"
-)
 
 // IsResourceCommentLine returns true if the line is a valid resource comment line
 // A valid line starts with a "#" and has a suffix describing the change
