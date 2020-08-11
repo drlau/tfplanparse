@@ -2,6 +2,7 @@ package tfplanparse
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -16,15 +17,11 @@ const (
 
 func Parse(input io.Reader) ([]*ResourceChange, error) {
 	result := []*ResourceChange{}
-	var resourceChange *ResourceChange
-	var mapAttributeChange *MapAttributeChange
-	var err error
-
 	parse := false
 	scanner := bufio.NewScanner(input)
 
 	for scanner.Scan() {
-		text := strings.TrimSpace(uncolor(scanner.Bytes()))
+		text := formatInput(scanner.Bytes())
 		if text == "" {
 			continue
 		}
@@ -41,57 +38,22 @@ func Parse(input io.Reader) ([]*ResourceChange, error) {
 			continue
 		}
 
-		if strings.Contains(text, CHANGES_END_STRING) {
-			// we are done
-			if resourceChange != nil {
-				result = append(result, resourceChange)
+		if IsResourceCommentLine(text) {
+			rc, err := parseResource(scanner)
+			if err != nil {
+				return nil, err
 			}
 
+			result = append(result, rc)
+		}
+
+		if strings.Contains(formatInput(scanner.Bytes()), CHANGES_END_STRING) {
+			// we are done
 			return result, nil
 		}
-
-		if IsResourceCommentLine(text) {
-			// if parsing a resource before, append it as is
-			if resourceChange != nil {
-				result = append(result, resourceChange)
-			}
-
-			resourceChange, err = NewResourceChangeFromComment(text)
-			if err != nil {
-				return result, err
-			}
-			// TODO: handle nested maps
-		} else if IsMapAttributeChangeLine(text) {
-			mapAttributeChange, err = NewMapAttributeChangeFromLine(text)
-			if err != nil {
-				return result, err
-			}
-		} else if IsAttributeChangeLine(text) {
-			ac, err := NewAttributeChangeFromLine(text)
-			if err != nil {
-				return result, err
-			}
-
-			// if currently parsing a map attribute, this attribute belongs to the map
-			if mapAttributeChange != nil {
-				mapAttributeChange.AttributeChanges = append(mapAttributeChange.AttributeChanges, ac)
-			} else {
-				resourceChange.AttributeChanges = append(resourceChange.AttributeChanges, ac)
-			}
-			// TODO: this does not handle nested maps at all
-		} else if mapAttributeChange != nil && IsMapAttributeTerminator(text) {
-			if resourceChange != nil {
-				resourceChange.MapAttributeChanges = append(resourceChange.MapAttributeChanges, mapAttributeChange)
-				mapAttributeChange = nil
-			}
-		}
 	}
 
-	if resourceChange != nil {
-		result = append(result, resourceChange)
-	}
-
-	return result, nil
+	return nil, fmt.Errorf("unexpected end of input while parsing plan")
 }
 
 func ParseFromFile(filepath string) ([]*ResourceChange, error) {
@@ -101,4 +63,66 @@ func ParseFromFile(filepath string) ([]*ResourceChange, error) {
 	}
 
 	return Parse(f)
+}
+
+func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
+	rc, err := NewResourceChangeFromComment(s.Text())
+	if err != nil {
+		return nil, err
+	}
+	for s.Scan() {
+		text := formatInput(s.Bytes())
+		switch {
+		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+			return rc, nil
+		case IsMapAttributeChangeLine(text):
+			ma, err := parseMapAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			rc.MapAttributeChanges = append(rc.MapAttributeChanges, ma)
+		case IsAttributeChangeLine(text):
+			ac, err := NewAttributeChangeFromLine(text)
+			if err != nil {
+				return nil, err
+			}
+			rc.AttributeChanges = append(rc.AttributeChanges, ac)
+		}
+	}
+
+	return nil, fmt.Errorf("unexpected end of input while parsing resource")
+}
+
+func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
+	result, err := NewMapAttributeChangeFromLine(s.Text())
+	if err != nil {
+		return nil, err
+	}
+	for s.Scan() {
+		text := formatInput(s.Bytes())
+		switch {
+		case IsMapAttributeTerminator(text):
+			return result, nil
+		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+			return nil, fmt.Errorf("unexpected line while parsing map attribute: %s", text)
+		case IsMapAttributeChangeLine(text):
+			ma, err := parseMapAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.MapAttributeChanges = append(result.MapAttributeChanges, ma)
+		case IsAttributeChangeLine(text):
+			ac, err := NewAttributeChangeFromLine(text)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ac)
+		}
+	}
+
+	return nil, fmt.Errorf("unexpected end of input while parsing map attribute")
+}
+
+func formatInput(input []byte) string {
+	return strings.TrimSpace(uncolor(input))
 }
