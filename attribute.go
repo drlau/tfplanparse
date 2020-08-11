@@ -43,7 +43,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
 
 		return &AttributeChange{
-			Name:       strings.TrimSpace(attribute[0]),
+			Name:       dequote(strings.TrimSpace(attribute[0])),
 			OldValue:   nil,
 			NewValue:   doTypeConversion(attribute[1]),
 			UpdateType: NewResource,
@@ -56,7 +56,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 			// assume delimited with a space
 			attribute = strings.Split(attribute[0], " ")
 			return &AttributeChange{
-				Name:       attribute[0],
+				Name:       dequote(attribute[0]),
 				OldValue:   doTypeConversion(attribute[len(attribute)-1]),
 				NewValue:   nil,
 				UpdateType: DestroyResource,
@@ -66,7 +66,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
 		if len(values) != 2 {
 			return &AttributeChange{
-				Name:       strings.TrimSpace(attribute[0]),
+				Name:       dequote(strings.TrimSpace(attribute[0])),
 				OldValue:   doTypeConversion(strings.TrimSpace(attribute[1])),
 				NewValue:   nil,
 				UpdateType: DestroyResource,
@@ -74,7 +74,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		}
 
 		return &AttributeChange{
-			Name:       strings.TrimSpace(attribute[0]),
+			Name:       dequote(strings.TrimSpace(attribute[0])),
 			OldValue:   doTypeConversion(values[0]),
 			NewValue:   nil,
 			UpdateType: DestroyResource,
@@ -99,7 +99,7 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		}
 
 		return &AttributeChange{
-			Name:       strings.TrimSpace(attribute[0]),
+			Name:       dequote(strings.TrimSpace(attribute[0])),
 			OldValue:   doTypeConversion(values[0]),
 			NewValue:   doTypeConversion(values[1]),
 			UpdateType: updateType,
