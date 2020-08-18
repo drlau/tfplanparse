@@ -2,8 +2,9 @@ package tfplanparse
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
+
+	"github.com/hashicorp/go-terraform-address"
 )
 
 const (
@@ -131,53 +132,17 @@ func NewResourceChangeFromComment(comment string) (*ResourceChange, error) {
 }
 
 func (rc *ResourceChange) finalizeResourceInfo() error {
-	var address string
-
-	// parse index first in case the index contains a "."
-	addressIndex := strings.Split(rc.Address, "[")
-	address = addressIndex[0]
-
-	if len(addressIndex) == 2 {
-		index := dequote(strings.TrimSuffix(addressIndex[1], "]"))
-
-		if i, err := strconv.Atoi(index); err == nil {
-			rc.Index = i
-		} else {
-			rc.Index = index
-		}
-	} else if len(addressIndex) > 2 {
-		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
+	parsedInterface, err := address.Parse("", []byte(rc.Address))
+	if err != nil {
+		return err
 	}
 
-	values := strings.Split(address, ".")
+	parsed := parsedInterface.(*address.Address)
 
-	// TODO: handle module.module_name.data.type.name better
-	// TODO: eventually do something with "data"
-	// For now, since we're not handling it, we can just remove it
-	for k, v := range values {
-		var previous string
-		if k != 0 {
-			previous = values[k-1]
-		}
-
-		// don't remove "data" if any of the conditions are true:
-		// 1. Previous element was "module" or "data" (this means the module or data itself is named "data")
-		// 2. There are less than 2 elements left to parse (this means the resource name or type is "data")
-		if v == "data" && (previous != "module" && previous != "data") && (len(values)-k) > 2 {
-			values = append(values[:k], values[k+1:]...)
-		}
-	}
-
-	if len(values) == 2 {
-		rc.Name = values[1]
-		rc.Type = values[0]
-	} else if len(values) > 2 {
-		rc.Name = values[len(values)-1]
-		rc.Type = values[len(values)-2]
-		rc.ModuleAddress = fmt.Sprintf("%s.%s", values[0], values[1])
-	} else {
-		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
-	}
+	rc.Type = parsed.ResourceSpec.Type
+	rc.Name = parsed.ResourceSpec.Name
+	rc.ModuleAddress = parsed.ModulePath.String()
+	rc.Index = parsed.ResourceSpec.Index.Value
 
 	return nil
 }

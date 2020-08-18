@@ -239,6 +239,10 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				t.Fatalf("Expected an error but didn't get one")
 			}
 
+			if err != nil && !tc.shouldError {
+				t.Fatalf("Unexpected error %v", err)
+			}
+
 			if !reflect.DeepEqual(got, tc.expected) {
 				t.Fatalf("Expected: %v but got %v", tc.expected, got)
 			}
