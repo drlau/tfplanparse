@@ -147,15 +147,14 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				UpdateType: NewResource,
 			},
 		},
-		"handles data paths spaces": {
-			line:        "    # data.mydata.resource.path will be read during apply",
+		"handles data": {
+			line:        "    # data.mydata.path will be read during apply",
 			shouldError: false,
 			expected: &ResourceChange{
-				Address:       "data.mydata.resource.path",
-				ModuleAddress: "data.mydata",
-				Type:          "resource",
-				Name:          "path",
-				UpdateType:    ReadResource,
+				Address:    "data.mydata.path",
+				Type:       "mydata",
+				Name:       "path",
+				UpdateType: ReadResource,
 			},
 		},
 		"handles modules with extra spaces": {
@@ -203,6 +202,28 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				Name:          "path",
 				Index:         1,
 				UpdateType:    NewResource,
+			},
+		},
+		"handles modules with data": {
+			line:        "    # module.mymodule.data.mydata.path will be read during apply",
+			shouldError: false,
+			expected: &ResourceChange{
+				Address:       "module.mymodule.data.mydata.path",
+				ModuleAddress: "module.mymodule",
+				Type:          "mydata",
+				Name:          "path",
+				UpdateType:    ReadResource,
+			},
+		},
+		"handles modules with data and data as the name": {
+			line:        "    # module.mymodule.data.data.data will be read during apply",
+			shouldError: false,
+			expected: &ResourceChange{
+				Address:       "module.mymodule.data.data.data",
+				ModuleAddress: "module.mymodule",
+				Type:          "data",
+				Name:          "data",
+				UpdateType:    ReadResource,
 			},
 		},
 		"other line": {

@@ -32,32 +32,32 @@ func TestParse(t *testing.T) {
 		// 	},
 		// },
 		"nested map": {
-			file:     "test/nestedmap.stdout",
+			file: "test/nestedmap.stdout",
 			expected: []*ResourceChange{
 				&ResourceChange{
-					Address: "module.mymodule.kubernetes_namespace.mynamespace",
-					ModuleAddress: "module.mymodule",
-					Type: "kubernetes_namespace",
-					Name: "mynamespace",
-					UpdateType: UpdateInPlaceResource,
+					Address:          "module.mymodule.kubernetes_namespace.mynamespace",
+					ModuleAddress:    "module.mymodule",
+					Type:             "kubernetes_namespace",
+					Name:             "mynamespace",
+					UpdateType:       UpdateInPlaceResource,
 					AttributeChanges: nil,
 					MapAttributeChanges: []*MapAttributeChange{
 						&MapAttributeChange{
-							Name: "metadata",
+							Name:             "metadata",
 							AttributeChanges: nil,
 							MapAttributeChanges: []*MapAttributeChange{
 								&MapAttributeChange{
 									Name: "labels",
 									AttributeChanges: []*AttributeChange{
 										&AttributeChange{
-											Name: "newLabel",
-											OldValue: nil,
-											NewValue: "newLabel",
+											Name:       "newLabel",
+											OldValue:   nil,
+											NewValue:   "newLabel",
 											UpdateType: NewResource,
 										},
 									},
 									MapAttributeChanges: nil,
-									UpdateType: UpdateInPlaceResource,
+									UpdateType:          UpdateInPlaceResource,
 								},
 							},
 							UpdateType: UpdateInPlaceResource,

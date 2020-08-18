@@ -151,7 +151,23 @@ func (rc *ResourceChange) finalizeResourceInfo() error {
 
 	values := strings.Split(address, ".")
 
-	// TODO: handle module.module_name.data.data_name.type.name better
+	// TODO: handle module.module_name.data.type.name better
+	// TODO: eventually do something with "data"
+	// For now, since we're not handling it, we can just remove it
+	for k, v := range values {
+		var previous string
+		if k != 0 {
+			previous = values[k-1]
+		}
+
+		// don't remove "data" if any of the conditions are true:
+		// 1. Previous element was "module" or "data" (this means the module or data itself is named "data")
+		// 2. There are less than 2 elements left to parse (this means the resource name or type is "data")
+		if v == "data" && (previous != "module" && previous != "data") && (len(values)-k) > 2 {
+			values = append(values[:k], values[k+1:]...)
+		}
+	}
+
 	if len(values) == 2 {
 		rc.Name = values[1]
 		rc.Type = values[0]
