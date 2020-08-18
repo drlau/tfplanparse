@@ -215,6 +215,18 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				UpdateType:    ReadResource,
 			},
 		},
+		"handles modules with data and index": {
+			line:        "    # module.mymodule.data.mydata.path[0] will be read during apply",
+			shouldError: false,
+			expected: &ResourceChange{
+				Address:       "module.mymodule.data.mydata.path[0]",
+				ModuleAddress: "module.mymodule",
+				Type:          "mydata",
+				Name:          "path",
+				Index:         0,
+				UpdateType:    ReadResource,
+			},
+		},
 		"handles modules with data and data as the name": {
 			line:        "    # module.mymodule.data.data.data will be read during apply",
 			shouldError: false,
