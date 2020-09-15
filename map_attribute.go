@@ -18,14 +18,14 @@ type MapAttributeChange struct {
 // This requires the line to start with "+", "-" or "~", not be followed with "resource" or "data", and ends with "{".
 func IsMapAttributeChangeLine(line string) bool {
 	line = strings.TrimSpace(line)
-	validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
+	// validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
 	validSuffix := strings.HasSuffix(line, "{") || IsOneLineEmptyMapAttribute(line)
-	return validPrefix && validSuffix && !IsResourceChangeLine(line)
+	return validSuffix && !IsResourceChangeLine(line)
 }
 
-// IsMapAttributeTerminator returns true if the line is a "}"
+// IsMapAttributeTerminator returns true if the line is a "}" or "},"
 func IsMapAttributeTerminator(line string) bool {
-	return strings.TrimSpace(line) == "}"
+	return strings.TrimSuffix(strings.TrimSpace(line), ",") == "}"
 }
 
 // IsOneLineEmptyMapAttribute returns true if the line ends with a "{}"
@@ -61,7 +61,10 @@ func NewMapAttributeChangeFromLine(line string) (*MapAttributeChange, error) {
 			UpdateType: UpdateInPlaceResource,
 		}, nil
 	} else {
-		return nil, fmt.Errorf("unrecognized line pattern")
+		return &MapAttributeChange{
+			Name:       attributeName,
+			UpdateType: NoOpResource,
+		}, nil
 	}
 }
 

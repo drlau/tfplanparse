@@ -36,7 +36,7 @@ func TestIsAttributeChangeLine(t *testing.T) {
 		},
 		"attribute is unchanged": {
 			line:     `attribute = "old"`,
-			expected: false,
+			expected: true,
 		},
 		"resource line": {
 			line:     `+ resource "type" "name" {`,
@@ -121,16 +121,6 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 				UpdateType: DestroyResource,
 			},
 		},
-		"empty map is deleted": {
-			line:        `- attribute {}`,
-			shouldError: false,
-			expected: &AttributeChange{
-				Name:       "attribute",
-				OldValue:   nil,
-				NewValue:   nil,
-				UpdateType: DestroyResource,
-			},
-		},
 		"attribute changed": {
 			line:        `~ attribute = "old" -> "new"`,
 			shouldError: false,
@@ -173,8 +163,13 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 		},
 		"attribute is unchanged": {
 			line:        `attribute = "old"`,
-			shouldError: true,
-			expected:    nil,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "attribute",
+				OldValue:   "old",
+				NewValue:   "old",
+				UpdateType: NoOpResource,
+			},
 		},
 		"resource line": {
 			line:        `+ resource "type" "name" {`,
