@@ -25,12 +25,63 @@ func TestParse(t *testing.T) {
 		// 	file: "test/nochanges.stdout",
 		// 	expected: nil,
 		// },
-		// "array": {
-		// 	file: "test/array.stdout",
-		// 	expected: []*ResourceChange{
-		// 		// TODO
-		// 	},
-		// },
+		"array": {
+			file: "test/array.stdout",
+			expected: []*ResourceChange{
+				&ResourceChange{
+					Address:       "module.my-project.google_project_services.gcp_enabled_services[0]",
+					ModuleAddress: "module.my-project",
+					Type:          "google_project_services",
+					Name:          "gcp_enabled_services",
+					Index:         0,
+					UpdateType:    DestroyResource,
+					AttributeChanges: []*AttributeChange{
+						&AttributeChange{
+							Name:       "disable_on_destroy",
+							OldValue:   false,
+							NewValue:   nil,
+							UpdateType: DestroyResource,
+						},
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   "my-project",
+							NewValue:   nil,
+							UpdateType: DestroyResource,
+						},
+						&AttributeChange{
+							Name:       "project",
+							OldValue:   "my-project",
+							NewValue:   nil,
+							UpdateType: DestroyResource,
+						},
+					},
+					ArrayAttributeChanges: []*ArrayAttributeChange{
+						&ArrayAttributeChange{
+							Name: "services",
+							AttributeChanges: []*AttributeChange{
+								&AttributeChange{
+									OldValue:   "appengine.googleapis.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									OldValue:   "audit.googleapis.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+					},
+					MapAttributeChanges: []*MapAttributeChange{
+						&MapAttributeChange{
+							Name:       "timeouts",
+							UpdateType: DestroyResource,
+						},
+					},
+				},
+			},
+		},
 		"nested map": {
 			file: "test/nestedmap.stdout",
 			expected: []*ResourceChange{

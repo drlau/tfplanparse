@@ -47,6 +47,9 @@ type ResourceChange struct {
 
 	// MapAttributeChanges contains all the planned attribute changes that are map type attributes
 	MapAttributeChanges []*MapAttributeChange
+
+	// ArrayAttributeChanges contains all the planned attribute changes that are array type attributes
+	ArrayAttributeChanges []*ArrayAttributeChange
 }
 
 // IsResourceCommentLine returns true if the line is a valid resource comment line
@@ -199,6 +202,10 @@ attrs:
 		result[m.Name] = m.GetBeforeAttribute(opts...)
 	}
 
+	for _, a := range rc.ArrayAttributeChanges {
+		result[a.Name] = a.GetBeforeAttribute(opts...)
+	}
+
 	return result
 }
 
@@ -217,6 +224,10 @@ attrs:
 
 	for _, m := range rc.MapAttributeChanges {
 		result[m.Name] = m.GetAfterAttribute(opts...)
+	}
+
+	for _, a := range rc.ArrayAttributeChanges {
+		result[a.Name] = a.GetAfterAttribute(opts...)
 	}
 
 	return result

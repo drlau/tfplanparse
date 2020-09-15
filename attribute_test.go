@@ -210,3 +210,111 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 		})
 	}
 }
+
+func TestNewAttributeChangeFromArray(t *testing.T) {
+	cases := map[string]struct {
+		line        string
+		expected    *AttributeChange
+		shouldError bool
+	}{
+		"empty line": {
+			line:        "",
+			shouldError: true,
+			expected:    nil,
+		},
+		"attribute created": {
+			line:        `+ "new"`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   "new",
+				UpdateType: NewResource,
+			},
+		},
+		"bools are parsed as bools": {
+			line:        `+ true`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   true,
+				UpdateType: NewResource,
+			},
+		},
+		"ints are parsed as ints": {
+			line:        `+ 1`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   1,
+				UpdateType: NewResource,
+			},
+		},
+		"decimals are parsed as floats": {
+			line:        `+ 1.23`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   1.23,
+				UpdateType: NewResource,
+			},
+		},
+		"attribute deleted": {
+			line:        `- "deleted"`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   "deleted",
+				NewValue:   nil,
+				UpdateType: DestroyResource,
+			},
+		},
+		"empty map is deleted": {
+			line:        `- {}`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   nil,
+				UpdateType: DestroyResource,
+			},
+		},
+		"attribute is unchanged": {
+			line:        `"old"`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   "old",
+				NewValue:   "old",
+				UpdateType: NoOpResource,
+			},
+		},
+		"resource line": {
+			line:        `+ resource "type" "name" {`,
+			shouldError: true,
+			expected:    nil,
+		},
+		"padded with spaces": {
+			line:        `    +        "new"`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   nil,
+				NewValue:   "new",
+				UpdateType: NewResource,
+			},
+		},
+		"other line": {
+			line:        `}`,
+			shouldError: true,
+			expected:    nil,
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got, err := NewAttributeChangeFromArray(tc.line)
+			if err == nil && tc.shouldError {
+				t.Fatalf("Expected an error but didn't get one")
+			}
+
+			if !reflect.DeepEqual(got, tc.expected) {
+				t.Fatalf("Expected: %v but got %v", tc.expected, got)
+			}
+		})
+	}
+}
