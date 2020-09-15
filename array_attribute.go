@@ -21,9 +21,9 @@ type ArrayAttributeChange struct {
 // This requires the line to start with "+", "-" or "~", not be followed with "resource" or "data", and ends with "[".
 func IsArrayAttributeChangeLine(line string) bool {
 	line = strings.TrimSpace(line)
-	validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
+	// validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
 	validSuffix := strings.HasSuffix(line, "[") || IsOneLineEmptyArrayAttribute(line)
-	return validPrefix && validSuffix && !IsResourceChangeLine(line)
+	return validSuffix && !IsResourceChangeLine(line)
 }
 
 // IsArrayAttributeTerminator returns true if the line is "]" or "] -> null"
@@ -64,7 +64,10 @@ func NewArrayAttributeChangeFromLine(line string) (*ArrayAttributeChange, error)
 			UpdateType: UpdateInPlaceResource,
 		}, nil
 	} else {
-		return nil, fmt.Errorf("unrecognized line pattern")
+		return &ArrayAttributeChange{
+			Name:       attributeName,
+			UpdateType: NoOpResource,
+		}, nil
 	}
 }
 

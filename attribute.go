@@ -24,10 +24,20 @@ type AttributeChange struct {
 // This requires the line to start with "+", "-" or "~", and not be followed with "resource"
 func IsAttributeChangeLine(line string) bool {
 	line = strings.TrimSpace(line)
-	validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
+	attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
+	// validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
 	multilineAttribute := strings.HasSuffix(line, "(") || strings.HasSuffix(line, "{")
 
-	return validPrefix && !multilineAttribute && !IsResourceChangeLine(line)
+	return len(attribute) == 2 && !multilineAttribute && !IsResourceChangeLine(line)
+}
+
+// IsAttributeChangeArrayItem returns true if the line is a valid attribute change in an array
+func IsAttributeChangeArrayItem(line string) bool {
+	line = strings.TrimSpace(line)
+	validSuffix := strings.HasSuffix(line, ",")
+	multilineAttribute := strings.HasSuffix(line, "(") || strings.HasSuffix(line, "{")
+
+	return validSuffix && !multilineAttribute && !IsResourceChangeLine(line)
 }
 
 // NewAttributeChangeFromLine initializes an AttributeChange from a line containing an attribute change
@@ -38,10 +48,10 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		return nil, fmt.Errorf("%s is not a valid line to initialize an attributeChange", line)
 	}
 
+	attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
+
 	if strings.HasPrefix(line, "+") {
 		// add
-		attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
-
 		return &AttributeChange{
 			Name:       dequote(strings.TrimSpace(attribute[0])),
 			OldValue:   nil,
@@ -50,19 +60,6 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		}, nil
 	} else if strings.HasPrefix(line, "-") {
 		// destroy
-		attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
-		if len(attribute) == 1 {
-			// line does not have an "="
-			// assume delimited with a space
-			attribute = strings.Split(attribute[0], " ")
-			return &AttributeChange{
-				Name:       dequote(attribute[0]),
-				OldValue:   doTypeConversion(attribute[len(attribute)-1]),
-				NewValue:   nil,
-				UpdateType: DestroyResource,
-			}, nil
-		}
-
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
 		if len(values) != 2 {
 			return &AttributeChange{
@@ -83,12 +80,10 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		// replace
 		updateType := UpdateInPlaceResource
 
-		if strings.HasSuffix(line, " # forces replacement") {
+		if strings.HasSuffix(attribute[1], " # forces replacement") {
 			updateType = ForceReplaceResource
-			line = strings.TrimSuffix(line, " # forces replacement")
+			attribute[1] = strings.TrimSuffix(attribute[1], " # forces replacement")
 		}
-
-		attribute := strings.SplitN(removeChangeTypeCharacters(line), ATTRIBUTE_DEFINITON_DELIMITER, 2)
 
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
 		if len(values) != 2 {
@@ -105,7 +100,12 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 			UpdateType: updateType,
 		}, nil
 	} else {
-		return nil, fmt.Errorf("unrecognized line pattern %s", line)
+		return &AttributeChange{
+			Name:       dequote(strings.TrimSpace(attribute[0])),
+			OldValue:   doTypeConversion(attribute[1]),
+			NewValue:   doTypeConversion(attribute[1]),
+			UpdateType: NoOpResource,
+		}, nil
 	}
 }
 

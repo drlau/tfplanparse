@@ -192,7 +192,7 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 				return nil, err
 			}
 			result.HeredocAttributeChanges = append(result.HeredocAttributeChanges, ha)
-		case IsAttributeChangeLine(text):
+		case IsAttributeChangeArrayItem(text):
 			if len(result.AttributeChanges) > 0 && (len(result.MapAttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
 				return nil, fmt.Errorf("detected a single attribute in an array with map or array attribute changes")
 			}

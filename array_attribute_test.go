@@ -66,13 +66,27 @@ func TestNewArrayAttributeChangeFromLine(t *testing.T) {
 		},
 		"attribute is unchanged": {
 			line:        `attribute [`,
-			shouldError: true,
-			expected:    nil,
+			shouldError: false,
+			expected: &ArrayAttributeChange{
+				Name:       "attribute",
+				UpdateType: NoOpResource,
+			},
 		},
 		"attribute with delimiter is unchanged": {
 			line:        `attribute = [`,
-			shouldError: true,
-			expected:    nil,
+			shouldError: false,
+			expected: &ArrayAttributeChange{
+				Name:       "attribute",
+				UpdateType: NoOpResource,
+			},
+		},
+		"unchanged empty array": {
+			line:        `attribute = []`,
+			shouldError: false,
+			expected: &ArrayAttributeChange{
+				Name:       "attribute",
+				UpdateType: NoOpResource,
+			},
 		},
 		"resource line": {
 			line:        `+ resource "type" "name" {`,
