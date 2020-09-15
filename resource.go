@@ -50,6 +50,9 @@ type ResourceChange struct {
 
 	// ArrayAttributeChanges contains all the planned attribute changes that are array type attributes
 	ArrayAttributeChanges []*ArrayAttributeChange
+
+	// HeredocAttributeChanges contains all the planned attribute changes that are heredoc type attributes
+	HeredocAttributeChanges []*HeredocAttributeChange
 }
 
 // IsResourceCommentLine returns true if the line is a valid resource comment line
@@ -206,6 +209,10 @@ attrs:
 		result[a.Name] = a.GetBeforeAttribute(opts...)
 	}
 
+	for _, h := range rc.HeredocAttributeChanges {
+		result[h.Name] = h.GetBeforeAttribute(opts...)
+	}
+
 	return result
 }
 
@@ -228,6 +235,10 @@ attrs:
 
 	for _, a := range rc.ArrayAttributeChanges {
 		result[a.Name] = a.GetAfterAttribute(opts...)
+	}
+
+	for _, h := range rc.HeredocAttributeChanges {
+		result[h.Name] = h.GetAfterAttribute(opts...)
 	}
 
 	return result

@@ -87,6 +87,12 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 				return nil, err
 			}
 			rc.ArrayAttributeChanges = append(rc.ArrayAttributeChanges, aa)
+		case IsHeredocAttributeChangeLine(text):
+			ha, err := parseHeredocAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			rc.HeredocAttributeChanges = append(rc.HeredocAttributeChanges, ha)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -127,6 +133,12 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 				return nil, err
 			}
 			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, aa)
+		case IsHeredocAttributeChangeLine(text):
+			ha, err := parseHeredocAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.HeredocAttributeChanges = append(result.HeredocAttributeChanges, ha)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -143,6 +155,9 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 	result, err := NewArrayAttributeChangeFromLine(s.Text())
 	if err != nil {
 		return nil, err
+	}
+	if IsOneLineEmptyArrayAttribute(s.Text()) {
+		return result, nil
 	}
 	// TODO: all elements of array attributes are the same type
 	for s.Scan() {
@@ -170,6 +185,13 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 				return nil, err
 			}
 			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, ma)
+		case IsHeredocAttributeChangeLine(text):
+			// TODO: strings are ok
+			ha, err := parseHeredocAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.HeredocAttributeChanges = append(result.HeredocAttributeChanges, ha)
 		case IsAttributeChangeLine(text):
 			if len(result.AttributeChanges) > 0 && (len(result.MapAttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
 				return nil, fmt.Errorf("detected a single attribute in an array with map or array attribute changes")
@@ -183,6 +205,25 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 	}
 
 	return nil, fmt.Errorf("unexpected end of input while parsing array attribute")
+}
+
+func parseHeredocAttribute(s *bufio.Scanner) (*HeredocAttributeChange, error) {
+	result, err := NewHeredocAttributeChangeFromLine(s.Text())
+	if err != nil {
+		return nil, err
+	}
+	for s.Scan() {
+		text := formatInput(s.Bytes())
+		if text == result.Token {
+			return result, nil
+		}
+
+		// TODO: should not trim space for heredoc, but only trim the indent
+		// TODO: it's also hard to determine if a line was deleted or is a list in an array
+		result.AddLineToContent(text)
+	}
+
+	return nil, fmt.Errorf("unexpected end of input while parsing heredoc attribute")
 }
 
 func formatInput(input []byte) string {

@@ -9,11 +9,12 @@ import (
 // Type of the attribute can vary, but they're all the same
 // Should use an interface
 type ArrayAttributeChange struct {
-	Name                  string
-	AttributeChanges      []*AttributeChange
-	MapAttributeChanges   []*MapAttributeChange
-	ArrayAttributeChanges []*ArrayAttributeChange
-	UpdateType            UpdateType
+	Name                    string
+	AttributeChanges        []*AttributeChange
+	MapAttributeChanges     []*MapAttributeChange
+	ArrayAttributeChanges   []*ArrayAttributeChange
+	HeredocAttributeChanges []*HeredocAttributeChange
+	UpdateType              UpdateType
 }
 
 // IsArrayAttributeChangeLine returns true if the line is a valid attribute change
@@ -94,6 +95,10 @@ attrs:
 		result = append(result, ma.GetBeforeAttribute(opts...))
 	}
 
+	for _, ha := range m.HeredocAttributeChanges {
+		result = append(result, ha.GetBeforeAttribute(opts...))
+	}
+
 	return result
 }
 
@@ -120,6 +125,10 @@ attrs:
 
 	for _, ma := range m.MapAttributeChanges {
 		result = append(result, ma.GetAfterAttribute(opts...))
+	}
+
+	for _, ha := range m.HeredocAttributeChanges {
+		result = append(result, ha.GetAfterAttribute(opts...))
 	}
 
 	return result

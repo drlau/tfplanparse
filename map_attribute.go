@@ -6,11 +6,12 @@ import (
 )
 
 type MapAttributeChange struct {
-	Name                  string
-	AttributeChanges      []*AttributeChange
-	MapAttributeChanges   []*MapAttributeChange
-	ArrayAttributeChanges []*ArrayAttributeChange
-	UpdateType            UpdateType
+	Name                    string
+	AttributeChanges        []*AttributeChange
+	MapAttributeChanges     []*MapAttributeChange
+	ArrayAttributeChanges   []*ArrayAttributeChange
+	HeredocAttributeChanges []*HeredocAttributeChange
+	UpdateType              UpdateType
 }
 
 // IsMapAttributeChangeLine returns true if the line is a valid attribute change
@@ -85,6 +86,10 @@ attrs:
 		result[aa.Name] = aa.GetBeforeAttribute(opts...)
 	}
 
+	for _, ha := range m.HeredocAttributeChanges {
+		result[ha.Name] = ha.GetBeforeAttribute(opts...)
+	}
+
 	return result
 }
 
@@ -107,6 +112,10 @@ attrs:
 
 	for _, aa := range m.ArrayAttributeChanges {
 		result[aa.Name] = aa.GetAfterAttribute(opts...)
+	}
+
+	for _, ha := range m.HeredocAttributeChanges {
+		result[ha.Name] = ha.GetAfterAttribute(opts...)
 	}
 
 	return result
