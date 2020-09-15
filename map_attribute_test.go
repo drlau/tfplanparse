@@ -87,6 +87,22 @@ func TestNewMapAttributeChangeFromLine(t *testing.T) {
 				UpdateType: NewResource,
 			},
 		},
+		"one line empty map": {
+			line:        `+ attribute = {}`,
+			shouldError: false,
+			expected: &MapAttributeChange{
+				Name:       "attribute",
+				UpdateType: NewResource,
+			},
+		},
+		"one line empty map with no delimiter": {
+			line:        `+ attribute {}`,
+			shouldError: false,
+			expected: &MapAttributeChange{
+				Name:       "attribute",
+				UpdateType: NewResource,
+			},
+		},
 		"other line": {
 			line:        `}`,
 			shouldError: true,
@@ -108,7 +124,7 @@ func TestNewMapAttributeChangeFromLine(t *testing.T) {
 	}
 }
 
-func TestGetBeforeAttribute(t *testing.T) {
+func TestMapGetBeforeAttribute(t *testing.T) {
 	cases := map[string]struct {
 		ma       *MapAttributeChange
 		expected map[string]interface{}
@@ -172,6 +188,26 @@ func TestGetBeforeAttribute(t *testing.T) {
 				"map": map[string]interface{}{
 					"attribute1": "oldValue1",
 					"attribute2": "oldValue2",
+				},
+			},
+		},
+		"array attribute": {
+			ma: &MapAttributeChange{
+				ArrayAttributeChanges: []*ArrayAttributeChange{
+					&ArrayAttributeChange{
+						Name: "array",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"array": []interface{}{
+					"oldValue1",
 				},
 			},
 		},
@@ -241,7 +277,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 	}
 }
 
-func TestGetAfterAttribute(t *testing.T) {
+func TestMapGetAfterAttribute(t *testing.T) {
 	cases := map[string]struct {
 		ma       *MapAttributeChange
 		expected map[string]interface{}
@@ -305,6 +341,26 @@ func TestGetAfterAttribute(t *testing.T) {
 				"map": map[string]interface{}{
 					"attribute1": "newValue1",
 					"attribute2": "newValue2",
+				},
+			},
+		},
+		"array attribute": {
+			ma: &MapAttributeChange{
+				ArrayAttributeChanges: []*ArrayAttributeChange{
+					&ArrayAttributeChange{
+						Name: "array",
+						AttributeChanges: []*AttributeChange{
+							&AttributeChange{
+								OldValue: "oldValue1",
+								NewValue: "newValue1",
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]interface{}{
+				"array": []interface{}{
+					"newValue1",
 				},
 			},
 		},

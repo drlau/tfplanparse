@@ -81,6 +81,12 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 				return nil, err
 			}
 			rc.MapAttributeChanges = append(rc.MapAttributeChanges, ma)
+		case IsArrayAttributeChangeLine(text):
+			aa, err := parseArrayAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			rc.ArrayAttributeChanges = append(rc.ArrayAttributeChanges, aa)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -98,6 +104,10 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 	if err != nil {
 		return nil, err
 	}
+	if IsOneLineEmptyMapAttribute(s.Text()) {
+		return result, nil
+	}
+
 	for s.Scan() {
 		text := formatInput(s.Bytes())
 		switch {
@@ -111,6 +121,12 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 				return nil, err
 			}
 			result.MapAttributeChanges = append(result.MapAttributeChanges, ma)
+		case IsArrayAttributeChangeLine(text):
+			aa, err := parseArrayAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, aa)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -121,6 +137,52 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 	}
 
 	return nil, fmt.Errorf("unexpected end of input while parsing map attribute")
+}
+
+func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
+	result, err := NewArrayAttributeChangeFromLine(s.Text())
+	if err != nil {
+		return nil, err
+	}
+	// TODO: all elements of array attributes are the same type
+	for s.Scan() {
+		text := formatInput(s.Bytes())
+		switch {
+		case IsArrayAttributeTerminator(text):
+			return result, nil
+		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+			return nil, fmt.Errorf("unexpected line while parsing array attribute: %s", text)
+		case IsMapAttributeChangeLine(text):
+			if len(result.MapAttributeChanges) > 0 && (len(result.AttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
+				return nil, fmt.Errorf("detected a map attribute in an array with single or array attribute changes")
+			}
+			ma, err := parseMapAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.MapAttributeChanges = append(result.MapAttributeChanges, ma)
+		case IsArrayAttributeChangeLine(text):
+			if len(result.ArrayAttributeChanges) > 0 && (len(result.AttributeChanges) > 0 || len(result.MapAttributeChanges) > 0) {
+				return nil, fmt.Errorf("detected an array attribute in an array with single or map attribute changes")
+			}
+			ma, err := parseArrayAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, ma)
+		case IsAttributeChangeLine(text):
+			if len(result.AttributeChanges) > 0 && (len(result.MapAttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
+				return nil, fmt.Errorf("detected a single attribute in an array with map or array attribute changes")
+			}
+			ac, err := NewAttributeChangeFromArray(text)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ac)
+		}
+	}
+
+	return nil, fmt.Errorf("unexpected end of input while parsing array attribute")
 }
 
 func formatInput(input []byte) string {

@@ -109,6 +109,40 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 	}
 }
 
+// NewAttributeChangeFromLine initializes an AttributeChange from a line within an Array attribute
+// In an array resource, the attribute change does not have a name
+func NewAttributeChangeFromArray(line string) (*AttributeChange, error) {
+	line = strings.TrimSpace(line)
+	if line == "" || line == "}" || IsResourceChangeLine(line) {
+		return nil, fmt.Errorf("%s is not a valid line to initialize an attributeChange", line)
+	}
+	if strings.HasPrefix(line, "+") {
+		// add
+		return &AttributeChange{
+			OldValue:   nil,
+			NewValue:   normalizeArrayAttribute(line),
+			UpdateType: NewResource,
+		}, nil
+	} else if strings.HasPrefix(line, "-") {
+		// destroy
+		return &AttributeChange{
+			OldValue:   normalizeArrayAttribute(line),
+			NewValue:   nil,
+			UpdateType: DestroyResource,
+		}, nil
+	} else if strings.HasPrefix(line, "~") {
+		// replace
+		// TODO: confirm this is possible? I think array entries are immutable
+		return nil, fmt.Errorf("unexpected replace single attribute in array %s", line)
+	} else {
+		return &AttributeChange{
+			OldValue:   normalizeArrayAttribute(line),
+			NewValue:   normalizeArrayAttribute(line),
+			UpdateType: NoOpResource,
+		}, nil
+	}
+}
+
 // IsSensitive returns true if the attribute contains a sensitive value
 func (a *AttributeChange) IsSensitive() bool {
 	return a.OldValue == SENSITIVE_VALUE || a.NewValue == SENSITIVE_VALUE
@@ -146,6 +180,10 @@ func doTypeConversion(input string) interface{} {
 	}
 
 	return input
+}
+
+func normalizeArrayAttribute(line string) interface{} {
+	return doTypeConversion(strings.TrimRight(removeChangeTypeCharacters(line), ","))
 }
 
 func removeChangeTypeCharacters(line string) string {
