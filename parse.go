@@ -73,8 +73,10 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 	for s.Scan() {
 		text := formatInput(s.Bytes())
 		switch {
-		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+		case IsResourceTerminator(text):
 			return rc, nil
+		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+			return nil, fmt.Errorf("unexpected line while parsing resource attribute: %s", text)
 		case IsMapAttributeChangeLine(text):
 			ma, err := parseMapAttribute(s)
 			if err != nil {

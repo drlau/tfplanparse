@@ -63,6 +63,11 @@ func IsResourceCommentLine(line string) bool {
 	return strings.HasPrefix(trimmed, "#") && !strings.HasSuffix(trimmed, RESOURCE_READ_VALUES_NOT_YET_KNOWN)
 }
 
+// IsResourceTerminator returns true if the line is a "}"
+func IsResourceTerminator(line string) bool {
+	return strings.TrimSpace(line) == "}"
+}
+
 // IsResourceChangeLine returns true if the line is a valid resource change line
 // A valid line starts with the change type, then "resource" or "data", and then the type and name, followed by a {
 // Example: + resource "type" "name" {

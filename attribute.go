@@ -191,5 +191,5 @@ func removeChangeTypeCharacters(line string) string {
 }
 
 func dequote(line string) string {
-	return strings.Trim(line, "\"")
+	return strings.TrimPrefix(strings.TrimSuffix(line, "\""), "\"")
 }
