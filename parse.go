@@ -216,7 +216,7 @@ func parseHeredocAttribute(s *bufio.Scanner) (*HeredocAttributeChange, error) {
 	}
 	for s.Scan() {
 		text := formatInput(s.Bytes())
-		if text == result.Token {
+		if IsHeredocAttributeTerminator(text) {
 			return result, nil
 		}
 

@@ -7,7 +7,6 @@ import (
 
 type HeredocAttributeChange struct {
 	Name       string
-	Token      string
 	Before     []string
 	After      []string
 	UpdateType UpdateType
