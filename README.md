@@ -49,7 +49,6 @@ The returned type from `Parse` and `ParseFromFile` is `[]*tfplanparse.ResourceCh
 - **`UpdateType`**: The type of update (refer to `updatetype.go` for possible values)
 - **`Tainted`**: Indicates whether the resource is tainted or not
 - **`AttributeChanges`**: Planned attribute changes
-- **`MapAttributeChanges`**: Planned attribute changes that are maps
 
 Each `ResourceChange` also has the following helper functions:
 
@@ -60,4 +59,5 @@ Additionally, these helper functions accept the following options:
 
 - **`IgnoreComputed`**
 - **`IgnoreSensitive`**
+- **`IgnoreNoOp`**
 - **`ComputedOnly`**
