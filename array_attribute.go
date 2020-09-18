@@ -9,13 +9,12 @@ import (
 // Type of the attribute can vary, but they're all the same
 // Should use an interface
 type ArrayAttributeChange struct {
-	Name                    string
-	AttributeChanges        []*AttributeChange
-	MapAttributeChanges     []*MapAttributeChange
-	ArrayAttributeChanges   []*ArrayAttributeChange
-	HeredocAttributeChanges []*HeredocAttributeChange
-	UpdateType              UpdateType
+	Name             string
+	AttributeChanges []attributeChange
+	UpdateType       UpdateType
 }
+
+var _ attributeChange = &ArrayAttributeChange{}
 
 // IsArrayAttributeChangeLine returns true if the line is a valid attribute change
 // This requires the line to start with "+", "-" or "~", not be followed with "resource" or "data", and ends with "[".
@@ -71,67 +70,70 @@ func NewArrayAttributeChangeFromLine(line string) (*ArrayAttributeChange, error)
 	}
 }
 
-func (m *ArrayAttributeChange) GetBeforeAttribute(opts ...GetBeforeAfterOptions) []interface{} {
+// GetName returns the name of the attribute
+func (a *ArrayAttributeChange) GetName() string {
+	return a.Name
+}
+
+// GetUpdateType returns the UpdateType of the attribute
+func (a *ArrayAttributeChange) GetUpdateType() UpdateType {
+	return a.UpdateType
+}
+
+// IsSensitive returns true if the attribute contains a sensitive value
+func (a *ArrayAttributeChange) IsSensitive() bool {
+	// return m.OldValue == SENSITIVE_VALUE || m.NewValue == SENSITIVE_VALUE
+	return false
+}
+
+// IsComputed returns true if the attribute contains a computed value
+func (a *ArrayAttributeChange) IsComputed() bool {
+	// return m.OldValue == COMPUTED_VALUE || m.NewValue == COMPUTED_VALUE
+	return false
+}
+
+// IsNoOp returns true if the attribute has not changed
+func (a *ArrayAttributeChange) IsNoOp() bool {
+	return a.UpdateType == NoOpResource
+}
+
+func (a *ArrayAttributeChange) GetBefore(opts ...GetBeforeAfterOptions) interface{} {
 	// TODO: ensure the result types are all the same
 	// Currently it is assumed that all changes added are the same type...
 	// This is handled correctly in parse, but we should handle it here
 	result := []interface{}{}
 
 attrs:
-	for _, a := range m.AttributeChanges {
-		if a.UpdateType == NewResource {
+	for _, ac := range a.AttributeChanges {
+		if ac.GetUpdateType() == NewResource {
 			continue attrs
 		}
 		for _, opt := range opts {
-			if opt(a) {
+			if opt(ac) {
 				continue attrs
 			}
 		}
-		result = append(result, a.OldValue)
-	}
-
-	for _, aa := range m.ArrayAttributeChanges {
-		result = append(result, aa.GetBeforeAttribute(opts...))
-	}
-
-	for _, ma := range m.MapAttributeChanges {
-		result = append(result, ma.GetBeforeAttribute(opts...))
-	}
-
-	for _, ha := range m.HeredocAttributeChanges {
-		result = append(result, ha.GetBeforeAttribute(opts...))
+		result = append(result, ac.GetBefore(opts...))
 	}
 
 	return result
 }
 
-func (m *ArrayAttributeChange) GetAfterAttribute(opts ...GetBeforeAfterOptions) []interface{} {
+func (a *ArrayAttributeChange) GetAfter(opts ...GetBeforeAfterOptions) interface{} {
 	// TODO: same as above
 	result := []interface{}{}
 
 attrs:
-	for _, a := range m.AttributeChanges {
-		if a.UpdateType == DestroyResource {
+	for _, ac := range a.AttributeChanges {
+		if ac.GetUpdateType() == DestroyResource {
 			continue attrs
 		}
 		for _, opt := range opts {
-			if opt(a) {
+			if opt(ac) {
 				continue attrs
 			}
 		}
-		result = append(result, a.NewValue)
-	}
-
-	for _, aa := range m.ArrayAttributeChanges {
-		result = append(result, aa.GetAfterAttribute(opts...))
-	}
-
-	for _, ma := range m.MapAttributeChanges {
-		result = append(result, ma.GetAfterAttribute(opts...))
-	}
-
-	for _, ha := range m.HeredocAttributeChanges {
-		result = append(result, ha.GetAfterAttribute(opts...))
+		result = append(result, ac.GetAfter(opts...))
 	}
 
 	return result

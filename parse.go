@@ -82,19 +82,19 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 			if err != nil {
 				return nil, err
 			}
-			rc.MapAttributeChanges = append(rc.MapAttributeChanges, ma)
+			rc.AttributeChanges = append(rc.AttributeChanges, ma)
 		case IsArrayAttributeChangeLine(text):
 			aa, err := parseArrayAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			rc.ArrayAttributeChanges = append(rc.ArrayAttributeChanges, aa)
+			rc.AttributeChanges = append(rc.AttributeChanges, aa)
 		case IsHeredocAttributeChangeLine(text):
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			rc.HeredocAttributeChanges = append(rc.HeredocAttributeChanges, ha)
+			rc.AttributeChanges = append(rc.AttributeChanges, ha)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -128,19 +128,19 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 			if err != nil {
 				return nil, err
 			}
-			result.MapAttributeChanges = append(result.MapAttributeChanges, ma)
+			result.AttributeChanges = append(result.AttributeChanges, ma)
 		case IsArrayAttributeChangeLine(text):
 			aa, err := parseArrayAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, aa)
+			result.AttributeChanges = append(result.AttributeChanges, aa)
 		case IsHeredocAttributeChangeLine(text):
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			result.HeredocAttributeChanges = append(result.HeredocAttributeChanges, ha)
+			result.AttributeChanges = append(result.AttributeChanges, ha)
 		case IsAttributeChangeLine(text):
 			ac, err := NewAttributeChangeFromLine(text)
 			if err != nil {
@@ -170,34 +170,24 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
 			return nil, fmt.Errorf("unexpected line while parsing array attribute: %s", text)
 		case IsMapAttributeChangeLine(text):
-			if len(result.MapAttributeChanges) > 0 && (len(result.AttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
-				return nil, fmt.Errorf("detected a map attribute in an array with single or array attribute changes")
-			}
 			ma, err := parseMapAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			result.MapAttributeChanges = append(result.MapAttributeChanges, ma)
+			result.AttributeChanges = append(result.AttributeChanges, ma)
 		case IsArrayAttributeChangeLine(text):
-			if len(result.ArrayAttributeChanges) > 0 && (len(result.AttributeChanges) > 0 || len(result.MapAttributeChanges) > 0) {
-				return nil, fmt.Errorf("detected an array attribute in an array with single or map attribute changes")
-			}
 			ma, err := parseArrayAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			result.ArrayAttributeChanges = append(result.ArrayAttributeChanges, ma)
+			result.AttributeChanges = append(result.AttributeChanges, ma)
 		case IsHeredocAttributeChangeLine(text):
-			// TODO: strings are ok
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
 				return nil, err
 			}
-			result.HeredocAttributeChanges = append(result.HeredocAttributeChanges, ha)
+			result.AttributeChanges = append(result.AttributeChanges, ha)
 		case IsAttributeChangeArrayItem(text):
-			if len(result.AttributeChanges) > 0 && (len(result.MapAttributeChanges) > 0 || len(result.ArrayAttributeChanges) > 0) {
-				return nil, fmt.Errorf("detected a single attribute in an array with map or array attribute changes")
-			}
 			ac, err := NewAttributeChangeFromArray(text)
 			if err != nil {
 				return nil, err

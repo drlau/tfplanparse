@@ -12,6 +12,8 @@ type HeredocAttributeChange struct {
 	UpdateType UpdateType
 }
 
+var _ attributeChange = &HeredocAttributeChange{}
+
 // IsHeredocAttributeChangeLine returns true if the line is a valid attribute change
 // This requires the line to start with "+", "-" or "~", delimited with a space, and the value to start with "<<".
 func IsHeredocAttributeChangeLine(line string) bool {
@@ -92,10 +94,35 @@ func (h *HeredocAttributeChange) AddLineToContent(line string) {
 	}
 }
 
-func (h *HeredocAttributeChange) GetBeforeAttribute(opts ...GetBeforeAfterOptions) string {
+// GetName returns the name of the attribute
+func (h *HeredocAttributeChange) GetName() string {
+	return h.Name
+}
+
+// GetUpdateType returns the UpdateType of the attribute
+func (h *HeredocAttributeChange) GetUpdateType() UpdateType {
+	return h.UpdateType
+}
+
+// IsSensitive returns true if the attribute contains a sensitive value
+func (h *HeredocAttributeChange) IsSensitive() bool {
+	return false
+}
+
+// IsComputed returns true if the attribute contains a computed value
+func (h *HeredocAttributeChange) IsComputed() bool {
+	return false
+}
+
+// IsNoOp returns true if the attribute has not changed
+func (h *HeredocAttributeChange) IsNoOp() bool {
+	return h.UpdateType == NoOpResource
+}
+
+func (h *HeredocAttributeChange) GetBefore(opts ...GetBeforeAfterOptions) interface{} {
 	return strings.Join(h.Before, "\n")
 }
 
-func (h *HeredocAttributeChange) GetAfterAttribute(opts ...GetBeforeAfterOptions) string {
+func (h *HeredocAttributeChange) GetAfter(opts ...GetBeforeAfterOptions) interface{} {
 	return strings.Join(h.After, "\n")
 }

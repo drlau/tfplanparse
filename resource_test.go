@@ -266,7 +266,7 @@ func TestGetBeforeResource(t *testing.T) {
 	}{
 		"one attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -280,7 +280,7 @@ func TestGetBeforeResource(t *testing.T) {
 		},
 		"multiple attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -300,10 +300,10 @@ func TestGetBeforeResource(t *testing.T) {
 		},
 		"map attribute": {
 			rc: &ResourceChange{
-				MapAttributeChanges: []*MapAttributeChange{
+				AttributeChanges: []attributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -327,17 +327,15 @@ func TestGetBeforeResource(t *testing.T) {
 		},
 		"map and normal attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
 						NewValue: "newValue",
 					},
-				},
-				MapAttributeChanges: []*MapAttributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -362,7 +360,7 @@ func TestGetBeforeResource(t *testing.T) {
 		},
 		"ignore sensitive values": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "(sensitive value)",
@@ -399,7 +397,7 @@ func TestGetAfterResource(t *testing.T) {
 	}{
 		"one attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -413,7 +411,7 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"multiple attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -433,10 +431,10 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"map attribute": {
 			rc: &ResourceChange{
-				MapAttributeChanges: []*MapAttributeChange{
+				AttributeChanges: []attributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -460,17 +458,15 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"map and normal attribute": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
 						NewValue: "newValue",
 					},
-				},
-				MapAttributeChanges: []*MapAttributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -495,7 +491,7 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"ignore sensitive values": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "(sensitive value)",
@@ -515,7 +511,7 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"ignore computed values": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -535,7 +531,7 @@ func TestGetAfterResource(t *testing.T) {
 		},
 		"computed only": {
 			rc: &ResourceChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",

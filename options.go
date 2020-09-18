@@ -1,15 +1,19 @@
 package tfplanparse
 
-type GetBeforeAfterOptions func(a *AttributeChange) bool
+type GetBeforeAfterOptions func(a attributeChange) bool
 
-func IgnoreComputed(a *AttributeChange) bool {
+func IgnoreComputed(a attributeChange) bool {
 	return a.IsComputed()
 }
 
-func IgnoreSensitive(a *AttributeChange) bool {
+func IgnoreSensitive(a attributeChange) bool {
 	return a.IsSensitive()
 }
 
-func ComputedOnly(a *AttributeChange) bool {
+func IgnoreNoOp(a attributeChange) bool {
+	return a.IsNoOp()
+}
+
+func ComputedOnly(a attributeChange) bool {
 	return !a.IsComputed()
 }

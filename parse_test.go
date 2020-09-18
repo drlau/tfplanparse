@@ -34,7 +34,7 @@ func TestParse(t *testing.T) {
 					Type:          "github_team_membership",
 					Name:          "member",
 					UpdateType:    DestroyResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "etag",
 							OldValue:   `W/\"etag-0\"`,
@@ -74,7 +74,7 @@ func TestParse(t *testing.T) {
 					Name:          "member",
 					Index:         1,
 					UpdateType:    DestroyResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "etag",
 							OldValue:   `W/\"etag-1\"`,
@@ -114,7 +114,7 @@ func TestParse(t *testing.T) {
 					Name:          "member",
 					Index:         2,
 					UpdateType:    DestroyResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "etag",
 							OldValue:   `W/\"etag-2\"`,
@@ -154,7 +154,7 @@ func TestParse(t *testing.T) {
 					Name:          "member",
 					Index:         3,
 					UpdateType:    DestroyResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "etag",
 							OldValue:   `W/\"etag-3\"`,
@@ -199,7 +199,7 @@ func TestParse(t *testing.T) {
 					Name:          "gcp_enabled_services",
 					Index:         0,
 					UpdateType:    DestroyResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "disable_on_destroy",
 							OldValue:   false,
@@ -218,11 +218,9 @@ func TestParse(t *testing.T) {
 							NewValue:   nil,
 							UpdateType: DestroyResource,
 						},
-					},
-					ArrayAttributeChanges: []*ArrayAttributeChange{
 						&ArrayAttributeChange{
 							Name: "services",
-							AttributeChanges: []*AttributeChange{
+							AttributeChanges: []attributeChange{
 								&AttributeChange{
 									OldValue:   "appengine.googleapis.com",
 									NewValue:   nil,
@@ -236,8 +234,6 @@ func TestParse(t *testing.T) {
 							},
 							UpdateType: DestroyResource,
 						},
-					},
-					MapAttributeChanges: []*MapAttributeChange{
 						&MapAttributeChange{
 							Name:       "timeouts",
 							UpdateType: DestroyResource,
@@ -255,23 +251,49 @@ func TestParse(t *testing.T) {
 					Type:          "kubernetes_namespace",
 					Name:          "mynamespace",
 					UpdateType:    UpdateInPlaceResource,
-					AttributeChanges: []*AttributeChange{
+					AttributeChanges: []attributeChange{
 						&AttributeChange{
 							Name:       "id",
 							OldValue:   "namespace-id",
 							NewValue:   "namespace-id",
 							UpdateType: NoOpResource,
 						},
-					},
-					MapAttributeChanges: []*MapAttributeChange{
 						&MapAttributeChange{
 							Name: "metadata",
-							AttributeChanges: []*AttributeChange{
+							AttributeChanges: []attributeChange{
+								&MapAttributeChange{
+									Name:       "annotations",
+									UpdateType: NoOpResource,
+								},
 								&AttributeChange{
 									Name:       "generation",
 									OldValue:   0,
 									NewValue:   0,
 									UpdateType: NoOpResource,
+								},
+								&MapAttributeChange{
+									Name: "labels",
+									AttributeChanges: []attributeChange{
+										&AttributeChange{
+											Name:       "label",
+											OldValue:   "value",
+											NewValue:   "value",
+											UpdateType: NoOpResource,
+										},
+										&AttributeChange{
+											Name:       "other",
+											OldValue:   "label",
+											NewValue:   "label",
+											UpdateType: NoOpResource,
+										},
+										&AttributeChange{
+											Name:       "newLabel",
+											OldValue:   nil,
+											NewValue:   "newLabel",
+											UpdateType: NewResource,
+										},
+									},
+									UpdateType: UpdateInPlaceResource,
 								},
 								&AttributeChange{
 									Name:       "name",
@@ -296,37 +318,6 @@ func TestParse(t *testing.T) {
 									OldValue:   "some-uid-123",
 									NewValue:   "some-uid-123",
 									UpdateType: NoOpResource,
-								},
-							},
-							MapAttributeChanges: []*MapAttributeChange{
-								&MapAttributeChange{
-									Name:       "annotations",
-									UpdateType: NoOpResource,
-								},
-								&MapAttributeChange{
-									Name: "labels",
-									AttributeChanges: []*AttributeChange{
-										&AttributeChange{
-											Name:       "label",
-											OldValue:   "value",
-											NewValue:   "value",
-											UpdateType: NoOpResource,
-										},
-										&AttributeChange{
-											Name:       "other",
-											OldValue:   "label",
-											NewValue:   "label",
-											UpdateType: NoOpResource,
-										},
-										&AttributeChange{
-											Name:       "newLabel",
-											OldValue:   nil,
-											NewValue:   "newLabel",
-											UpdateType: NewResource,
-										},
-									},
-									MapAttributeChanges: nil,
-									UpdateType:          UpdateInPlaceResource,
 								},
 							},
 							UpdateType: UpdateInPlaceResource,

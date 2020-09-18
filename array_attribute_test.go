@@ -138,7 +138,7 @@ func TestNewArrayAttributeChangeFromLine(t *testing.T) {
 	}
 }
 
-func TestGetBeforeAttribute(t *testing.T) {
+func TestGetBefore(t *testing.T) {
 	cases := map[string]struct {
 		aa       *ArrayAttributeChange
 		expected []interface{}
@@ -146,7 +146,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 	}{
 		"one attribute": {
 			aa: &ArrayAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -160,7 +160,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 		},
 		"multiple attribute": {
 			aa: &ArrayAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -180,7 +180,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 		},
 		"ignores new attributes": {
 			aa: &ArrayAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -200,10 +200,10 @@ func TestGetBeforeAttribute(t *testing.T) {
 		},
 		"map attribute": {
 			aa: &ArrayAttributeChange{
-				MapAttributeChanges: []*MapAttributeChange{
+				AttributeChanges: []attributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -227,7 +227,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 		},
 		"ignore sensitive values": {
 			aa: &ArrayAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "(sensitive value)",
@@ -249,7 +249,7 @@ func TestGetBeforeAttribute(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.aa.GetBeforeAttribute(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
+			if got := tc.aa.GetBefore(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
 				t.Fatalf("Expected: %v but got %v", tc.expected, got)
 			}
 		})

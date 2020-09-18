@@ -43,16 +43,7 @@ type ResourceChange struct {
 	Tainted bool
 
 	// AttributeChanges contains all the planned attribute changes
-	AttributeChanges []*AttributeChange
-
-	// MapAttributeChanges contains all the planned attribute changes that are map type attributes
-	MapAttributeChanges []*MapAttributeChange
-
-	// ArrayAttributeChanges contains all the planned attribute changes that are array type attributes
-	ArrayAttributeChanges []*ArrayAttributeChange
-
-	// HeredocAttributeChanges contains all the planned attribute changes that are heredoc type attributes
-	HeredocAttributeChanges []*HeredocAttributeChange
+	AttributeChanges []attributeChange
 }
 
 // IsResourceCommentLine returns true if the line is a valid resource comment line
@@ -203,19 +194,7 @@ attrs:
 				continue attrs
 			}
 		}
-		result[a.Name] = a.OldValue
-	}
-
-	for _, m := range rc.MapAttributeChanges {
-		result[m.Name] = m.GetBeforeAttribute(opts...)
-	}
-
-	for _, a := range rc.ArrayAttributeChanges {
-		result[a.Name] = a.GetBeforeAttribute(opts...)
-	}
-
-	for _, h := range rc.HeredocAttributeChanges {
-		result[h.Name] = h.GetBeforeAttribute(opts...)
+		result[a.GetName()] = a.GetBefore(opts...)
 	}
 
 	return result
@@ -231,19 +210,7 @@ attrs:
 				continue attrs
 			}
 		}
-		result[a.Name] = a.NewValue
-	}
-
-	for _, m := range rc.MapAttributeChanges {
-		result[m.Name] = m.GetAfterAttribute(opts...)
-	}
-
-	for _, a := range rc.ArrayAttributeChanges {
-		result[a.Name] = a.GetAfterAttribute(opts...)
-	}
-
-	for _, h := range rc.HeredocAttributeChanges {
-		result[h.Name] = h.GetAfterAttribute(opts...)
+		result[a.GetName()] = a.GetAfter(opts...)
 	}
 
 	return result

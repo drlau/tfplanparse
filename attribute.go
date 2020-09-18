@@ -13,12 +13,24 @@ const (
 	COMPUTED_VALUE                = "(known after apply)"
 )
 
+type attributeChange interface {
+	GetName() string
+	GetUpdateType() UpdateType
+	GetBefore(opts ...GetBeforeAfterOptions) interface{}
+	GetAfter(opts ...GetBeforeAfterOptions) interface{}
+	IsComputed() bool
+	IsSensitive() bool
+	IsNoOp() bool
+}
+
 type AttributeChange struct {
 	Name       string
 	OldValue   interface{}
 	NewValue   interface{}
 	UpdateType UpdateType
 }
+
+var _ attributeChange = &AttributeChange{}
 
 // IsAttributeChangeLine returns true if the line is a valid attribute change
 // This requires the line to start with "+", "-" or "~", and not be followed with "resource"
@@ -143,6 +155,26 @@ func NewAttributeChangeFromArray(line string) (*AttributeChange, error) {
 	}
 }
 
+// GetName returns the name of the attribute
+func (a *AttributeChange) GetName() string {
+	return a.Name
+}
+
+// GetUpdateType returns the UpdateType of the attribute
+func (a *AttributeChange) GetUpdateType() UpdateType {
+	return a.UpdateType
+}
+
+// GetBefore returns the initial value of the attribute
+func (a *AttributeChange) GetBefore(opts ...GetBeforeAfterOptions) interface{} {
+	return a.OldValue
+}
+
+// GetAfter returns the planned value of the attribute
+func (a *AttributeChange) GetAfter(opts ...GetBeforeAfterOptions) interface{} {
+	return a.NewValue
+}
+
 // IsSensitive returns true if the attribute contains a sensitive value
 func (a *AttributeChange) IsSensitive() bool {
 	return a.OldValue == SENSITIVE_VALUE || a.NewValue == SENSITIVE_VALUE
@@ -151,6 +183,11 @@ func (a *AttributeChange) IsSensitive() bool {
 // IsComputed returns true if the attribute contains a computed value
 func (a *AttributeChange) IsComputed() bool {
 	return a.OldValue == COMPUTED_VALUE || a.NewValue == COMPUTED_VALUE
+}
+
+// IsNoOp returns true if the attribute has not changed
+func (a *AttributeChange) IsNoOp() bool {
+	return a.UpdateType == NoOpResource
 }
 
 func doTypeConversion(input string) interface{} {

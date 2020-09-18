@@ -138,7 +138,7 @@ func TestNewMapAttributeChangeFromLine(t *testing.T) {
 	}
 }
 
-func TestMapGetBeforeAttribute(t *testing.T) {
+func TestMapGetBefore(t *testing.T) {
 	cases := map[string]struct {
 		ma       *MapAttributeChange
 		expected map[string]interface{}
@@ -146,7 +146,7 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 	}{
 		"one attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -160,7 +160,7 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 		},
 		"multiple attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -180,10 +180,10 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 		},
 		"map attribute": {
 			ma: &MapAttributeChange{
-				MapAttributeChanges: []*MapAttributeChange{
+				AttributeChanges: []attributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -207,10 +207,10 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 		},
 		"array attribute": {
 			ma: &MapAttributeChange{
-				ArrayAttributeChanges: []*ArrayAttributeChange{
+				AttributeChanges: []attributeChange{
 					&ArrayAttributeChange{
 						Name: "array",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								OldValue: "oldValue1",
 								NewValue: "newValue1",
@@ -227,17 +227,15 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 		},
 		"map and normal attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
 						NewValue: "newValue",
 					},
-				},
-				MapAttributeChanges: []*MapAttributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -262,7 +260,7 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 		},
 		"ignore sensitive values": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "(sensitive value)",
@@ -284,14 +282,14 @@ func TestMapGetBeforeAttribute(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.ma.GetBeforeAttribute(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
+			if got := tc.ma.GetBefore(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
 				t.Fatalf("Expected: %v but got %v", tc.expected, got)
 			}
 		})
 	}
 }
 
-func TestMapGetAfterAttribute(t *testing.T) {
+func TestMapGetAfter(t *testing.T) {
 	cases := map[string]struct {
 		ma       *MapAttributeChange
 		expected map[string]interface{}
@@ -299,7 +297,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 	}{
 		"one attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -313,7 +311,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"multiple attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute1",
 						OldValue: "oldValue1",
@@ -333,10 +331,10 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"map attribute": {
 			ma: &MapAttributeChange{
-				MapAttributeChanges: []*MapAttributeChange{
+				AttributeChanges: []attributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -360,10 +358,10 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"array attribute": {
 			ma: &MapAttributeChange{
-				ArrayAttributeChanges: []*ArrayAttributeChange{
+				AttributeChanges: []attributeChange{
 					&ArrayAttributeChange{
 						Name: "array",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								OldValue: "oldValue1",
 								NewValue: "newValue1",
@@ -380,17 +378,15 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"map and normal attribute": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
 						NewValue: "newValue",
 					},
-				},
-				MapAttributeChanges: []*MapAttributeChange{
 					&MapAttributeChange{
 						Name: "map",
-						AttributeChanges: []*AttributeChange{
+						AttributeChanges: []attributeChange{
 							&AttributeChange{
 								Name:     "attribute1",
 								OldValue: "oldValue1",
@@ -415,7 +411,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"ignore sensitive values": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "(sensitive value)",
@@ -435,7 +431,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"ignore computed values": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -455,7 +451,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 		},
 		"computed only": {
 			ma: &MapAttributeChange{
-				AttributeChanges: []*AttributeChange{
+				AttributeChanges: []attributeChange{
 					&AttributeChange{
 						Name:     "attribute",
 						OldValue: "oldValue",
@@ -476,7 +472,7 @@ func TestMapGetAfterAttribute(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			if got := tc.ma.GetAfterAttribute(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
+			if got := tc.ma.GetAfter(tc.opts...); !reflect.DeepEqual(got, tc.expected) {
 				t.Fatalf("Expected: %v but got %v", tc.expected, got)
 			}
 		})
