@@ -66,7 +66,7 @@ func ParseFromFile(filepath string) ([]*ResourceChange, error) {
 }
 
 func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
-	rc, err := NewResourceChangeFromComment(formatInput(s.Text()))
+	rc, err := NewResourceChangeFromComment(formatInput(s.Bytes()))
 	if err != nil {
 		return nil, err
 	}
