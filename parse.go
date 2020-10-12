@@ -108,11 +108,12 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 }
 
 func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
-	result, err := NewMapAttributeChangeFromLine(s.Text())
+	normalized := formatInput(s.Bytes())
+	result, err := NewMapAttributeChangeFromLine(normalized)
 	if err != nil {
 		return nil, err
 	}
-	if IsOneLineEmptyMapAttribute(s.Text()) {
+	if IsOneLineEmptyMapAttribute(normalized) {
 		return result, nil
 	}
 
@@ -154,11 +155,12 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 }
 
 func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
-	result, err := NewArrayAttributeChangeFromLine(s.Text())
+	normalized := formatInput(s.Bytes())
+	result, err := NewArrayAttributeChangeFromLine(normalized)
 	if err != nil {
 		return nil, err
 	}
-	if IsOneLineEmptyArrayAttribute(s.Text()) {
+	if IsOneLineEmptyArrayAttribute(normalized) {
 		return result, nil
 	}
 	// TODO: all elements of array attributes are the same type
@@ -200,7 +202,8 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 }
 
 func parseHeredocAttribute(s *bufio.Scanner) (*HeredocAttributeChange, error) {
-	result, err := NewHeredocAttributeChangeFromLine(s.Text())
+	normalized := formatInput(s.Bytes())
+	result, err := NewHeredocAttributeChangeFromLine(normalized)
 	if err != nil {
 		return nil, err
 	}
