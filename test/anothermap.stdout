@@ -1,0 +1,65 @@
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+# module.mymodule.kubernetes_role_binding.user_is_edit will be created
+  + resource "kubernetes_role_binding" "user_is_edit" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "user-is-edit"
+          + namespace        = "my-namespace"
+          + resource_version = (known after apply)
+          + self_link        = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + role_ref {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "ClusterRole"
+          + name      = "edit"
+        }
+
+      + subject {
+          + api_group = "rbac.authorization.k8s.io"
+          + kind      = "User"
+          + name      = "user@email.com"
+        }
+    }
+
+# module.mymodule.kubernetes_role_binding.user_is_view will be destroyed
+  - resource "kubernetes_role_binding" "user_is_view" {
+      - id = "my-namespace/user_is_view" -> null
+
+      - metadata {
+          - annotations      = {
+              - "my-annotation" = "annot"
+            } -> null
+          - generation       = 0 -> null
+          - labels           = {} -> null
+          - name             = "user-is-view" -> null
+          - namespace        = "my-namespace" -> null
+          - resource_version = "123" -> null
+          - self_link        = "/apis/rbac.authorization.k8s.io/v1/namespaces/my-namespace/rolebindings/user-is-view" -> null
+          - uid              = "some-uid" -> null
+        }
+
+      - role_ref {
+          - api_group = "rbac.authorization.k8s.io"
+          - kind      = "ClusterRole"
+          - name      = "view"
+        }
+
+      - subject {
+          - api_group = "rbac.authorization.k8s.io"
+          - kind      = "User"
+          - name      = "user@email.com"
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.

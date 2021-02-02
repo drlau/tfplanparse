@@ -330,6 +330,239 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		"another map": {
+			file: "test/anothermap.stdout",
+			expected: []*ResourceChange{
+				&ResourceChange{
+					Address:       "module.mymodule.kubernetes_role_binding.user_is_edit",
+					ModuleAddress: "module.mymodule",
+					Type:          "kubernetes_role_binding",
+					Name:          "user_is_edit",
+					UpdateType:    NewResource,
+					AttributeChanges: []attributeChange{
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   nil,
+							NewValue:   "(known after apply)",
+							UpdateType: NewResource,
+						},
+						&MapAttributeChange{
+							Name: "metadata",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "generation",
+									OldValue:   nil,
+									NewValue:   "(known after apply)",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   nil,
+									NewValue:   "user-is-edit",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "namespace",
+									OldValue:   nil,
+									NewValue:   "my-namespace",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "resource_version",
+									OldValue:   nil,
+									NewValue:   "(known after apply)",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "self_link",
+									OldValue:   nil,
+									NewValue:   "(known after apply)",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "uid",
+									OldValue:   nil,
+									NewValue:   "(known after apply)",
+									UpdateType: NewResource,
+								},
+							},
+							UpdateType: NewResource,
+						},
+						&MapAttributeChange{
+							Name: "role_ref",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   nil,
+									NewValue:   "rbac.authorization.k8s.io",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   nil,
+									NewValue:   "ClusterRole",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   nil,
+									NewValue:   "edit",
+									UpdateType: NewResource,
+								},
+							},
+							UpdateType: NewResource,
+						},
+						&MapAttributeChange{
+							Name: "subject",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   nil,
+									NewValue:   "rbac.authorization.k8s.io",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   nil,
+									NewValue:   "User",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   nil,
+									NewValue:   "user@email.com",
+									UpdateType: NewResource,
+								},
+							},
+							UpdateType: NewResource,
+						},
+					},
+				},
+				&ResourceChange{
+					Address:       "module.mymodule.kubernetes_role_binding.user_is_view",
+					ModuleAddress: "module.mymodule",
+					Type:          "kubernetes_role_binding",
+					Name:          "user_is_view",
+					UpdateType:    DestroyResource,
+					AttributeChanges: []attributeChange{
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   "my-namespace/user_is_view",
+							NewValue:   nil,
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "metadata",
+							AttributeChanges: []attributeChange{
+								&MapAttributeChange{
+									Name: "annotations",
+									AttributeChanges: []attributeChange{
+										&AttributeChange{
+											Name:       "my-annotation",
+											OldValue:   "annot",
+											NewValue:   nil,
+											UpdateType: DestroyResource,
+										},
+									},
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "generation",
+									OldValue:   0,
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "labels",
+									OldValue:   nil,
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "user-is-view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "namespace",
+									OldValue:   "my-namespace",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "resource_version",
+									OldValue:   "123",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "self_link",
+									OldValue:   "/apis/rbac.authorization.k8s.io/v1/namespaces/my-namespace/rolebindings/user-is-view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "uid",
+									OldValue:   "some-uid",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "role_ref",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   "rbac.authorization.k8s.io",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   "ClusterRole",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "subject",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   "rbac.authorization.k8s.io",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   "User",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "user@email.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+					},
+				},
+			},
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
