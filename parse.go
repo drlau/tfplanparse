@@ -89,6 +89,12 @@ func parseResource(s *bufio.Scanner) (*ResourceChange, error) {
 				return nil, err
 			}
 			rc.AttributeChanges = append(rc.AttributeChanges, aa)
+		case IsJSONEncodeAttributeChangeLine(text):
+			ja, err := parseJSONEncodeAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			rc.AttributeChanges = append(rc.AttributeChanges, ja)
 		case IsHeredocAttributeChangeLine(text):
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
@@ -136,6 +142,12 @@ func parseMapAttribute(s *bufio.Scanner) (*MapAttributeChange, error) {
 				return nil, err
 			}
 			result.AttributeChanges = append(result.AttributeChanges, aa)
+		case IsJSONEncodeAttributeChangeLine(text):
+			ja, err := parseJSONEncodeAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ja)
 		case IsHeredocAttributeChangeLine(text):
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
@@ -183,6 +195,12 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 				return nil, err
 			}
 			result.AttributeChanges = append(result.AttributeChanges, ma)
+		case IsJSONEncodeAttributeChangeLine(text):
+			ja, err := parseJSONEncodeAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ja)
 		case IsHeredocAttributeChangeLine(text):
 			ha, err := parseHeredocAttribute(s)
 			if err != nil {
@@ -199,6 +217,53 @@ func parseArrayAttribute(s *bufio.Scanner) (*ArrayAttributeChange, error) {
 	}
 
 	return nil, fmt.Errorf("unexpected end of input while parsing array attribute")
+}
+
+func parseJSONEncodeAttribute(s *bufio.Scanner) (*JSONEncodeAttributeChange, error) {
+	normalized := formatInput(s.Bytes())
+	result, err := NewJSONEncodeAttributeChangeFromLine(normalized)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: check if oneline check needed
+
+	for s.Scan() {
+		text := formatInput(s.Bytes())
+		switch {
+		case IsJSONEncodeAttributeTerminator(text):
+			return result, nil
+		case IsResourceCommentLine(text), strings.Contains(text, CHANGES_END_STRING):
+			return nil, fmt.Errorf("unexpected line while parsing jsonencode attribute: %s", text)
+		case IsMapAttributeChangeLine(text):
+			ma, err := parseMapAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ma)
+		case IsArrayAttributeChangeLine(text):
+			aa, err := parseArrayAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, aa)
+		case IsHeredocAttributeChangeLine(text):
+			// TODO: check if this is even allowed by terraform
+			ha, err := parseHeredocAttribute(s)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ha)
+		case IsAttributeChangeLine(text):
+			// TODO: check if this is even allowed by terraform
+			ac, err := NewAttributeChangeFromLine(text)
+			if err != nil {
+				return nil, err
+			}
+			result.AttributeChanges = append(result.AttributeChanges, ac)
+		}
+	}
+
+	return nil, fmt.Errorf("unexpected end of input while parsing jsonencode attribute")
 }
 
 func parseHeredocAttribute(s *bufio.Scanner) (*HeredocAttributeChange, error) {

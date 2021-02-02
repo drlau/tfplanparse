@@ -563,6 +563,254 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		"jsonencode": {
+			file: "test/jsonencode.stdout",
+			expected: []*ResourceChange{
+				&ResourceChange{
+					Address:       "module.mymodule.kubernetes_role_binding.user_is_view",
+					ModuleAddress: "module.mymodule",
+					Type:          "kubernetes_role_binding",
+					Name:          "user_is_view",
+					UpdateType:    DestroyResource,
+					AttributeChanges: []attributeChange{
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   "my-namespace/user_is_view",
+							NewValue:   nil,
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "metadata",
+							AttributeChanges: []attributeChange{
+								&MapAttributeChange{
+									Name: "annotations",
+									AttributeChanges: []attributeChange{
+										&JSONEncodeAttributeChange{
+											Name: "encoded",
+											AttributeChanges: []attributeChange{
+												&MapAttributeChange{
+													AttributeChanges: []attributeChange{
+														&AttributeChange{
+															Name:       "apiVersion",
+															OldValue:   "rbac.authorization.k8s.io/v1",
+															NewValue:   nil,
+															UpdateType: DestroyResource,
+														},
+														&AttributeChange{
+															Name:       "kind",
+															OldValue:   "RoleBinding",
+															NewValue:   nil,
+															UpdateType: DestroyResource,
+														},
+														&MapAttributeChange{
+															Name: "metadata",
+															AttributeChanges: []attributeChange{
+																&MapAttributeChange{
+																	Name: "annotations",
+																	AttributeChanges: []attributeChange{
+																		&AttributeChange{
+																			Name:       "my-annotation",
+																			OldValue:   "annot",
+																			NewValue:   nil,
+																			UpdateType: DestroyResource,
+																		},
+																	},
+																	UpdateType: DestroyResource,
+																},
+																&AttributeChange{
+																	Name:       "creationTimestamp",
+																	OldValue:   "null",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+																&MapAttributeChange{
+																	Name: "labels",
+																	AttributeChanges: []attributeChange{
+																		&AttributeChange{
+																			Name:       "my-label",
+																			OldValue:   "label",
+																			NewValue:   nil,
+																			UpdateType: DestroyResource,
+																		},
+																	},
+																	UpdateType: DestroyResource,
+																},
+																&AttributeChange{
+																	Name:       "name",
+																	OldValue:   "user-is-view",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+																&AttributeChange{
+																	Name:       "namespace",
+																	OldValue:   "my-namespace",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+															},
+															UpdateType: DestroyResource,
+														},
+														&MapAttributeChange{
+															Name: "roleRef",
+															AttributeChanges: []attributeChange{
+																&AttributeChange{
+																	Name:       "apiGroup",
+																	OldValue:   "rbac.authorization.k8s.io",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+																&AttributeChange{
+																	Name:       "kind",
+																	OldValue:   "ClusterRole",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+																&AttributeChange{
+																	Name:       "name",
+																	OldValue:   "view",
+																	NewValue:   nil,
+																	UpdateType: DestroyResource,
+																},
+															},
+															UpdateType: DestroyResource,
+														},
+														&ArrayAttributeChange{
+															Name: "subjects",
+															AttributeChanges: []attributeChange{
+																&MapAttributeChange{
+																	Name: "",
+																	AttributeChanges: []attributeChange{
+																		&AttributeChange{
+																			Name:       "apiGroup",
+																			OldValue:   "rbac.authorization.k8s.io",
+																			NewValue:   nil,
+																			UpdateType: DestroyResource,
+																		},
+																		&AttributeChange{
+																			Name:       "kind",
+																			OldValue:   "User",
+																			NewValue:   nil,
+																			UpdateType: DestroyResource,
+																		},
+																		&AttributeChange{
+																			Name:       "name",
+																			OldValue:   "user@email.com",
+																			NewValue:   nil,
+																			UpdateType: DestroyResource,
+																		},
+																	},
+																	UpdateType: DestroyResource,
+																},
+															},
+															UpdateType: DestroyResource,
+														},
+													},
+													// TODO: this should be DestroyResource
+													UpdateType: NoOpResource,
+												},
+											},
+											UpdateType: DestroyResource,
+										},
+									},
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "generation",
+									OldValue:   0,
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "labels",
+									OldValue:   nil,
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "user-is-view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "namespace",
+									OldValue:   "my-namespace",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "resource_version",
+									OldValue:   "123",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "self_link",
+									OldValue:   "/apis/rbac.authorization.k8s.io/v1/namespaces/my-namespace/rolebindings/user-is-view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "uid",
+									OldValue:   "some-uid",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "role_ref",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   "rbac.authorization.k8s.io",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   "ClusterRole",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "view",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+						&MapAttributeChange{
+							Name: "subject",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "api_group",
+									OldValue:   "rbac.authorization.k8s.io",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "kind",
+									OldValue:   "User",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "user@email.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: DestroyResource,
+						},
+					},
+				},
+			},
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
