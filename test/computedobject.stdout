@@ -1,0 +1,24 @@
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.my-project.google_project_services.gcp_enabled_services[0] will be updated in-place
+  ~ resource "google_project_services" "gcp_enabled_services" {
+      ~ disable_on_destroy = false -> true
+      ~ id                 = "my-project" -> "test"
+      ~ project            = "my-project" -> "test2"
+      ~ computed_services           = [
+          - "appengine.googleapis.com",
+          - "audit.googleapis.com",
+        ] -> (known after apply)
+      ~ computed_tags              = {
+          ~ key1    = "old" -> "new"
+        } -> (known after apply)
+      ~ timeouts {}
+    }
+
+Plan: 0 to add, 0 to change, 1 to destroy.

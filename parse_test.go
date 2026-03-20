@@ -242,6 +242,71 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		"computedmap": {
+			file: "test/computedobject.stdout",
+			expected: []*ResourceChange{
+				&ResourceChange{
+					Address:       "module.my-project.google_project_services.gcp_enabled_services[0]",
+					ModuleAddress: "module.my-project",
+					Type:          "google_project_services",
+					Name:          "gcp_enabled_services",
+					Index:         0,
+					UpdateType:    UpdateInPlaceResource,
+					AttributeChanges: []attributeChange{
+						&AttributeChange{
+							Name:       "disable_on_destroy",
+							OldValue:   false,
+							NewValue:   true,
+							UpdateType: UpdateInPlaceResource,
+						},
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   "my-project",
+							NewValue:   "test",
+							UpdateType: UpdateInPlaceResource,
+						},
+						&AttributeChange{
+							Name:       "project",
+							OldValue:   "my-project",
+							NewValue:   "test2",
+							UpdateType: UpdateInPlaceResource,
+						},
+						&ArrayAttributeChange{
+							Name: "computed_services",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									OldValue:   "appengine.googleapis.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+								&AttributeChange{
+									OldValue:   "audit.googleapis.com",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: UpdateInPlaceResource,
+						},
+						&MapAttributeChange{
+							Name: "computed_tags",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									Name:       "key1",
+									OldValue:   "old",
+									NewValue:   "new",
+									UpdateType: UpdateInPlaceResource,
+								},
+							},
+							UpdateType: UpdateInPlaceResource,
+						},
+						&MapAttributeChange{
+							Name:       "timeouts",
+							UpdateType: UpdateInPlaceResource,
+						},
+					},
+				},
+			},
+		},
 		"nested map": {
 			file: "test/nestedmap.stdout",
 			expected: []*ResourceChange{

@@ -27,7 +27,7 @@ func IsArrayAttributeChangeLine(line string) bool {
 
 // IsArrayAttributeTerminator returns true if the line is "]" or "] -> null"
 func IsArrayAttributeTerminator(line string) bool {
-	return strings.TrimSuffix(strings.TrimSpace(line), " -> null") == "]"
+	return strings.TrimSuffix(strings.TrimSpace(line), " -> null") == "]" || strings.TrimSuffix(strings.TrimSpace(line), " -> (known after apply)") == "]"
 }
 
 // IsOneLineEmptyArrayAttribute returns true if the line ends with a "[]"

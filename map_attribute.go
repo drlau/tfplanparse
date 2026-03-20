@@ -24,7 +24,7 @@ func IsMapAttributeChangeLine(line string) bool {
 
 // IsMapAttributeTerminator returns true if the line is a "}" or "},"
 func IsMapAttributeTerminator(line string) bool {
-	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(line), ","), " -> null") == "}"
+	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(line), ","), " -> null") == "}" || strings.TrimSuffix(strings.TrimSuffix(strings.TrimSpace(line), ","), " -> (known after apply)") == "}"
 }
 
 // IsOneLineEmptyMapAttribute returns true if the line ends with a "{}"
