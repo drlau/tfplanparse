@@ -65,7 +65,7 @@ func NewHeredocAttributeChangeFromLine(line string) (*HeredocAttributeChange, er
 	} else if strings.HasPrefix(line, "~") {
 		// replace
 		updateType := UpdateInPlaceResource
-		if strings.HasSuffix(attribute[1], " # forces replacement") {
+		if strings.HasSuffix(attribute[1], ForcesReplacementComment) {
 			updateType = ForceReplaceResource
 		}
 

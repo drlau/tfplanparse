@@ -575,6 +575,115 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		"forcereplace": {
+			file: "test/forcereplace.stdout",
+			expected: []*ResourceChange{
+				&ResourceChange{
+					Address:       "module.mymodule.kubernetes_namespace.mynamespace",
+					ModuleAddress: "module.mymodule",
+					Type:          "kubernetes_namespace",
+					Name:          "mynamespace",
+					UpdateType:    ForceReplaceResource,
+					AttributeChanges: []attributeChange{
+						&AttributeChange{
+							Name:       "id",
+							OldValue:   "namespace-id",
+							NewValue:   "namespace-id",
+							UpdateType: ForceReplaceResource,
+						},
+						&MapAttributeChange{
+							Name: "metadata",
+							AttributeChanges: []attributeChange{
+								&MapAttributeChange{
+									Name:       "annotations",
+									UpdateType: NoOpResource,
+								},
+								&AttributeChange{
+									Name:       "generation",
+									OldValue:   0,
+									NewValue:   0,
+									UpdateType: NoOpResource,
+								},
+								&MapAttributeChange{
+									Name: "labels",
+									AttributeChanges: []attributeChange{
+										&AttributeChange{
+											Name:       "label",
+											OldValue:   "value",
+											NewValue:   "value",
+											UpdateType: NoOpResource,
+										},
+										&AttributeChange{
+											Name:       "other",
+											OldValue:   "label",
+											NewValue:   "label",
+											UpdateType: NoOpResource,
+										},
+										&AttributeChange{
+											Name:       "newLabel",
+											OldValue:   nil,
+											NewValue:   "newLabel",
+											UpdateType: NewResource,
+										},
+									},
+									UpdateType: UpdateInPlaceResource,
+								},
+								&AttributeChange{
+									Name:       "name",
+									OldValue:   "my-namespace",
+									NewValue:   "my-namespace",
+									UpdateType: NoOpResource,
+								},
+								&AttributeChange{
+									Name:       "resource_version",
+									OldValue:   "123",
+									NewValue:   "123",
+									UpdateType: NoOpResource,
+								},
+								&AttributeChange{
+									Name:       "self_link",
+									OldValue:   "/api/v1/namespaces/my-namespace",
+									NewValue:   "/api/v1/namespaces/my-namespace",
+									UpdateType: NoOpResource,
+								},
+								&AttributeChange{
+									Name:       "uid",
+									OldValue:   "some-uid-123",
+									NewValue:   "some-uid-123",
+									UpdateType: NoOpResource,
+								},
+							},
+							UpdateType: ForceReplaceResource,
+						},
+						&ArrayAttributeChange{
+							Name: "array_test",
+							AttributeChanges: []attributeChange{
+								&AttributeChange{
+									OldValue:   nil,
+									NewValue:   "entry1",
+									UpdateType: NewResource,
+								},
+								&AttributeChange{
+									OldValue:   "entry2",
+									NewValue:   nil,
+									UpdateType: DestroyResource,
+								},
+							},
+							UpdateType: ForceReplaceResource,
+						},
+						&ArrayAttributeChange{
+							Name: "array_test2",
+							AttributeChanges: nil,
+							UpdateType: ForceReplaceResource,
+						},
+						&MapAttributeChange{
+							Name:       "timeouts",
+							UpdateType: NoOpResource,
+						},
+					},
+				},
+			},
+		},
 		"jsonencode": {
 			file: "test/jsonencode.stdout",
 			expected: []*ResourceChange{

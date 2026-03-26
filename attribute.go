@@ -11,6 +11,8 @@ const (
 	ATTRIBUTE_DEFINITON_DELIMITER = " = "
 	SENSITIVE_VALUE               = "(sensitive value)"
 	COMPUTED_VALUE                = "(known after apply)"
+	// ForcesReplacementComment is the suffix Terraform appends to attributes that trigger replace.
+	ForcesReplacementComment = " # forces replacement"
 )
 
 type attributeChange interface {
@@ -92,9 +94,9 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 		// replace
 		updateType := UpdateInPlaceResource
 
-		if strings.HasSuffix(attribute[1], " # forces replacement") {
+		if strings.HasSuffix(attribute[1], ForcesReplacementComment) {
 			updateType = ForceReplaceResource
-			attribute[1] = strings.TrimSuffix(attribute[1], " # forces replacement")
+			attribute[1] = strings.TrimSuffix(attribute[1], ForcesReplacementComment)
 		}
 
 		values := strings.Split(attribute[1], ATTRIBUTE_CHANGE_DELIMITER)
@@ -112,11 +114,18 @@ func NewAttributeChangeFromLine(line string) (*AttributeChange, error) {
 			UpdateType: updateType,
 		}, nil
 	} else {
+		valStr := strings.TrimSpace(attribute[1])
+		updateType := NoOpResource
+		if strings.HasSuffix(valStr, ForcesReplacementComment) {
+			valStr = strings.TrimSpace(strings.TrimSuffix(valStr, ForcesReplacementComment))
+			updateType = ForceReplaceResource
+		}
+		conv := doTypeConversion(valStr)
 		return &AttributeChange{
 			Name:       dequote(strings.TrimSpace(attribute[0])),
-			OldValue:   doTypeConversion(attribute[1]),
-			NewValue:   doTypeConversion(attribute[1]),
-			UpdateType: NoOpResource,
+			OldValue:   conv,
+			NewValue:   conv,
+			UpdateType: updateType,
 		}, nil
 	}
 }

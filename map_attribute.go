@@ -15,10 +15,11 @@ var _ attributeChange = &MapAttributeChange{}
 
 // IsMapAttributeChangeLine returns true if the line is a valid attribute change
 // This requires the line to start with "+", "-" or "~", not be followed with "resource" or "data", and ends with "{".
+// Terraform may append ForcesReplacementComment after the opening brace.
 func IsMapAttributeChangeLine(line string) bool {
 	line = strings.TrimSpace(line)
-	// validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
-	validSuffix := strings.HasSuffix(line, "{") || IsOneLineEmptyMapAttribute(line)
+	base := strings.TrimSpace(strings.TrimSuffix(line, ForcesReplacementComment))
+	validSuffix := strings.HasSuffix(base, "{") || IsOneLineEmptyMapAttribute(line)
 	return validSuffix && !IsResourceChangeLine(line)
 }
 
@@ -29,7 +30,9 @@ func IsMapAttributeTerminator(line string) bool {
 
 // IsOneLineEmptyMapAttribute returns true if the line ends with a "{}"
 func IsOneLineEmptyMapAttribute(line string) bool {
-	return strings.HasSuffix(line, "{}")
+	line = strings.TrimSpace(line)
+	line = strings.TrimSuffix(line, ForcesReplacementComment)
+	return strings.HasSuffix(strings.TrimSpace(line), "{}")
 }
 
 // NewMapAttributeChangeFromLine initializes an AttributeChange from a line containing an attribute change
@@ -54,10 +57,13 @@ func NewMapAttributeChangeFromLine(line string) (*MapAttributeChange, error) {
 			UpdateType: DestroyResource,
 		}, nil
 	} else if strings.HasPrefix(line, "~") {
-		// replace
+		updateType := UpdateInPlaceResource
+		if strings.HasSuffix(strings.TrimSpace(line), ForcesReplacementComment) {
+			updateType = ForceReplaceResource
+		}
 		return &MapAttributeChange{
 			Name:       attributeName,
-			UpdateType: UpdateInPlaceResource,
+			UpdateType: updateType,
 		}, nil
 	} else {
 		return &MapAttributeChange{
