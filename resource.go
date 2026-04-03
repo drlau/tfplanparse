@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"regexp"
 )
 
 const (
@@ -15,6 +16,11 @@ const (
 	RESOURCE_REPLACED                  = " must be replaced"
 	RESOURCE_DESTROYED                 = " will be destroyed"
 )
+
+type ResourceIndex struct {
+	Index interface{}
+	Address string
+}
 
 type ResourceChange struct {
 	// Address contains the absolute resource address
@@ -33,7 +39,11 @@ type ResourceChange struct {
 
 	// The index key for resources created with "count" or "for_each"
 	// "count" resources will be an int index, and "for_each" will be a string
+	// This will only contain the final index, if you need the full index path, look at FullIndex
 	Index interface{}
+
+	// The full index path for resources created with "count" or "for_each"
+	FullIndex []ResourceIndex
 
 	// UpdateType contains the type of update
 	// Refer to updatetype.go for possible values
@@ -150,26 +160,50 @@ func NewResourceChangeFromComment(comment string) (*ResourceChange, error) {
 	return rc, nil
 }
 
-func (rc *ResourceChange) finalizeResourceInfo() error {
-	var address string
+// extractIndexes Extracts the final index from a resource path, along with any indexes on parent resources
+func extractIndexes(address string) []ResourceIndex {
+  getAllIndexs := regexp.MustCompile(`([^\[]*)(\[([^\]]*)\])?`)
+	matches := getAllIndexs.FindAllStringSubmatch(address, -1)
+	allIndexes := []ResourceIndex{}
+	//fmt.Println("matches", address, matches)
 
-	// parse index first in case the index contains a "."
-	addressIndex := strings.Split(rc.Address, "[")
-	address = addressIndex[0]
-
-	if len(addressIndex) == 2 {
-		index := dequote(strings.TrimSuffix(addressIndex[1], "]"))
-
-		if i, err := strconv.Atoi(index); err == nil {
-			rc.Index = i
-		} else {
-			rc.Index = index
+	hasIndexes := false
+	for _, match := range matches {
+		var realIndex interface{}
+		if len(match) > 2 && match[3] != "" {
+			if i, err := strconv.Atoi(match[3]); err == nil {
+				realIndex = i
+			} else {
+				realIndex = strings.Trim(strings.Trim(match[3], "\""), "'")
+			}
+			hasIndexes = true
 		}
-	} else if len(addressIndex) > 2 {
-		return fmt.Errorf("failed to parse resource info from address %s", rc.Address)
+		allIndexes = append(allIndexes, ResourceIndex{
+			Index: realIndex,
+			Address: strings.TrimPrefix(match[1], "."),
+		})
 	}
+	if !hasIndexes {
+		return []ResourceIndex{}
+	}
+	return allIndexes
+}
 
-	values := strings.Split(address, ".")
+func (rc *ResourceChange) finalizeResourceInfo() error {
+	// parse index first in case the index contains a "."
+	allIndexes := extractIndexes(rc.Address)
+	values := []string{}
+	if len(allIndexes) > 0 {
+		rc.Index = allIndexes[len(allIndexes)-1].Index
+		rc.FullIndex = allIndexes
+		for _, index := range allIndexes {
+			for _, part := range strings.Split(index.Address, ".") {
+				values = append(values, strings.TrimSuffix(strings.TrimPrefix(part, "."), "."))
+			}
+		}
+	} else {
+		values = strings.Split(rc.Address, ".")
+	}
 
 	// TODO: handle module.module_name.data.type.name better
 	// TODO: eventually do something with "data"

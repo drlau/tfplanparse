@@ -171,6 +171,16 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 				UpdateType: NoOpResource,
 			},
 		},
+		"unchanged attribute forces replacement": {
+			line:        `id = "namespace-id"` + ForcesReplacementComment,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "id",
+				OldValue:   "namespace-id",
+				NewValue:   "namespace-id",
+				UpdateType: ForceReplaceResource,
+			},
+		},
 		"resource line": {
 			line:        `+ resource "type" "name" {`,
 			shouldError: true,

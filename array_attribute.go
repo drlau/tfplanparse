@@ -18,21 +18,24 @@ var _ attributeChange = &ArrayAttributeChange{}
 
 // IsArrayAttributeChangeLine returns true if the line is a valid attribute change
 // This requires the line to start with "+", "-" or "~", not be followed with "resource" or "data", and ends with "[".
+// Terraform may append ForcesReplacementComment after the opening bracket.
 func IsArrayAttributeChangeLine(line string) bool {
 	line = strings.TrimSpace(line)
-	// validPrefix := strings.HasPrefix(line, "+") || strings.HasPrefix(line, "-") || strings.HasPrefix(line, "~")
-	validSuffix := strings.HasSuffix(line, "[") || IsOneLineEmptyArrayAttribute(line)
+	base := strings.TrimSpace(strings.TrimSuffix(line, ForcesReplacementComment))
+	validSuffix := strings.HasSuffix(base, "[") || IsOneLineEmptyArrayAttribute(line)
 	return validSuffix && !IsResourceChangeLine(line)
 }
 
 // IsArrayAttributeTerminator returns true if the line is "]" or "] -> null"
 func IsArrayAttributeTerminator(line string) bool {
-	return strings.TrimSuffix(strings.TrimSpace(line), " -> null") == "]"
+	return strings.TrimSuffix(strings.TrimSpace(line), " -> null") == "]" || strings.TrimSuffix(strings.TrimSpace(line), " -> (known after apply)") == "]"
 }
 
 // IsOneLineEmptyArrayAttribute returns true if the line ends with a "[]"
 func IsOneLineEmptyArrayAttribute(line string) bool {
-	return strings.HasSuffix(line, "[]")
+	line = strings.TrimSpace(line)
+	line = strings.TrimSuffix(line, ForcesReplacementComment)
+	return strings.HasSuffix(strings.TrimSpace(line), "[]")
 }
 
 // NewArrayAttributeChangeFromLine initializes an ArrayAttributeChange from a line containing an array attribute change
@@ -57,10 +60,13 @@ func NewArrayAttributeChangeFromLine(line string) (*ArrayAttributeChange, error)
 			UpdateType: DestroyResource,
 		}, nil
 	} else if strings.HasPrefix(line, "~") {
-		// replace
+		updateType := UpdateInPlaceResource
+		if strings.HasSuffix(strings.TrimSpace(line), ForcesReplacementComment) {
+			updateType = ForceReplaceResource
+		}
 		return &ArrayAttributeChange{
 			Name:       attributeName,
-			UpdateType: UpdateInPlaceResource,
+			UpdateType: updateType,
 		}, nil
 	} else {
 		return &ArrayAttributeChange{

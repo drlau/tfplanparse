@@ -64,6 +64,14 @@ func TestNewMapAttributeChangeFromLine(t *testing.T) {
 				UpdateType: UpdateInPlaceResource,
 			},
 		},
+		"attribute changed forces replacement": {
+			line:        `~ triggers = {` + ForcesReplacementComment,
+			shouldError: false,
+			expected: &MapAttributeChange{
+				Name:       "triggers",
+				UpdateType: ForceReplaceResource,
+			},
+		},
 		"attribute is unchanged": {
 			line:        `attribute {`,
 			shouldError: false,

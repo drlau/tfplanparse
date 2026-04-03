@@ -1,0 +1,18 @@
+
+------------------------------------------------------------------------
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # module.mymodule.module.submodule[0].data.subsubmodule.this[0] will be read during apply
+  # (config refers to values not yet known)
+  <= data "double_nested_submodule_data_source" "this" {
+      + dummy         = (known after apply)
+    }
+
+Plan: 0 to add, 0 to change, 0 to destroy.
+
+
