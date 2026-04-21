@@ -177,6 +177,12 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				Type:          "resource",
 				Name:          "path",
 				Index:         "index",
+				FullIndex: []ResourceIndex{
+					{
+						Index: "index",
+						Address: "module.mymodule.resource.path",
+					},
+				},
 				UpdateType:    NewResource,
 			},
 		},
@@ -189,6 +195,12 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				Type:          "resource",
 				Name:          "path",
 				Index:         "index@test.com",
+				FullIndex: []ResourceIndex{
+					{
+						Index: "index@test.com",
+						Address: "module.mymodule.resource.path",
+					},
+				},
 				UpdateType:    NewResource,
 			},
 		},
@@ -201,6 +213,12 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				Type:          "resource",
 				Name:          "path",
 				Index:         1,
+				FullIndex: []ResourceIndex{
+					{
+						Index: 1,
+						Address: "module.mymodule.resource.path",
+					},
+				},
 				UpdateType:    NewResource,
 			},
 		},
@@ -224,6 +242,34 @@ func TestNewResourceChangeFromComment(t *testing.T) {
 				Type:          "mydata",
 				Name:          "path",
 				Index:         0,
+				FullIndex: []ResourceIndex{
+					{
+						Index: 0,
+						Address: "module.mymodule.data.mydata.path",
+					},
+				},
+				UpdateType:    ReadResource,
+			},
+		},
+		"handles modules with data and two indexes": {
+			line:        "    # module.mymodule[2].data.mydata.path[0] will be read during apply",
+			shouldError: false,
+			expected: &ResourceChange{
+				Address:       "module.mymodule[2].data.mydata.path[0]",
+				ModuleAddress: "module.mymodule",
+				Type:          "mydata",
+				Name:          "path",
+				Index:         0,
+				FullIndex: []ResourceIndex{
+					{
+						Index: 2,
+						Address: "module.mymodule",
+					},
+					{
+						Index: 0,
+						Address: "data.mydata.path",
+					},
+				},
 				UpdateType:    ReadResource,
 			},
 		},

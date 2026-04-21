@@ -171,6 +171,16 @@ func TestNewAttributeChangeFromLine(t *testing.T) {
 				UpdateType: NoOpResource,
 			},
 		},
+		"unchanged attribute forces replacement": {
+			line:        `id = "namespace-id"` + ForcesReplacementComment,
+			shouldError: false,
+			expected: &AttributeChange{
+				Name:       "id",
+				OldValue:   "namespace-id",
+				NewValue:   "namespace-id",
+				UpdateType: ForceReplaceResource,
+			},
+		},
 		"resource line": {
 			line:        `+ resource "type" "name" {`,
 			shouldError: true,
@@ -292,6 +302,15 @@ func TestNewAttributeChangeFromArray(t *testing.T) {
 				OldValue:   nil,
 				NewValue:   "new",
 				UpdateType: NewResource,
+			},
+		},
+		"array item swapped": {
+			line:        `~ "old" -> "new"`,
+			shouldError: false,
+			expected: &AttributeChange{
+				OldValue:   "old",
+				NewValue:   "new",
+				UpdateType: UpdateInPlaceResource,
 			},
 		},
 		"other line": {

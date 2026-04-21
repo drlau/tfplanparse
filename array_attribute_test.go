@@ -64,6 +64,14 @@ func TestNewArrayAttributeChangeFromLine(t *testing.T) {
 				UpdateType: UpdateInPlaceResource,
 			},
 		},
+		"attribute changed forces replacement": {
+			line:        `~ array_test = [` + ForcesReplacementComment,
+			shouldError: false,
+			expected: &ArrayAttributeChange{
+				Name:       "array_test",
+				UpdateType: ForceReplaceResource,
+			},
+		},
 		"attribute is unchanged": {
 			line:        `attribute [`,
 			shouldError: false,
